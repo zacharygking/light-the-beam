@@ -85,9 +85,19 @@ Print the console test part (`plinth_test.stl`, about 40 minutes) before the ful
 
 Firmware builds and the parser is tested against real responses, but nothing has run on hardware yet. The three things most likely to need a tweak on first flash are display rotation, the touch pressure threshold, and the first LED's data level. The preseason opener is October 5, 2026 (LAL @ SAC); the live and final screens get their first real data then.
 
-## Ideas for v2
+## Live win probability (v2, on the bench)
 
-**Live win probability on the LIVE screen.** A small logistic model (score margin, seconds remaining, period, home/away) fitted offline in Python on public NBA play-by-play data, exported as a handful of coefficients into a header, and evaluated on the board in a few lines of C++. It would show as a pill under the score, e.g. "SAC 78%". It costs no extra API calls: every input is already in the ESPN response the firmware polls during a game. The training data is already in the repo: `tools/fetch_pbp.py` pulled every play of the 2024-25 and 2025-26 seasons from ESPN (about 1.27 million plays across 2,643 games, with ESPN's own win probability on each play as a benchmark), described in `data/README.md`. The training script, its calibration curve and Brier score, and a JSONL of predictions against outcomes would live in `tools/` and `docs/` so the numbers are reproducible. Waiting on real live fixtures from the October 2026 preseason games before starting.
+A four-coefficient logistic model of the home team's chance to win from the score, clock and period, the fields the firmware already polls, so it adds no requests. It was fitted on every play of the 2024-25 season and evaluated on every play of 2025-26, with ESPN's own in-game win probability recorded on the same plays as the benchmark:
+
+| | Brier (lower is better) | log loss |
+|---|---|---|
+| this model | 0.162 | 0.476 |
+| ESPN | 0.147 | 0.442 |
+| home-court prior only | 0.247 | 0.687 |
+
+The gap to ESPN is pregame information (team strength, possession): three Brier points in the first quarter, one thousandth by the fourth. Details, calibration table and next steps are in [docs/winprob.md](docs/winprob.md).
+
+The bench is C++: `firmware/src/winprob.h` is the exact function the ESP32 will run, and `pio test -e native -f test_winprob` checks it against the Python trainer on 300 sampled plays, checks its shape (symmetry, monotonicity, end points), and replays all 641,199 held-out plays through it, asserting the Brier, fourth-quarter and calibration numbers above. It runs in CI. Data comes from `tools/fetch_pbp.py` (see [data/README.md](data/README.md)); `tools/train_winprob.py` refits and regenerates the header, fixtures and report. Not wired to the screen yet; that is a pill under the live score once the hardware is up.
 
 ## Credits
 
