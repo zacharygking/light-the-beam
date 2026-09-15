@@ -12,3 +12,5 @@ models/printables/*
 !models/printables/README.md
 # OS
 .DS_Store
+# Per-game ESPN summaries cached by tools/fetch_pbp.py (~100 MB, regenerable)
+data/raw/
