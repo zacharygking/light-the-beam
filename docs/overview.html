@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Light the Beam</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --purple: #5a2d81; --lav: #b48ae6; --glow: #c9a2f0;
+    --ink: #1d1830; --muted: #6b6482; --line: #d9d5e4; --paper: #ffffff; --tint: #f4f2f8;
+    --dark-top: #1a1030; --dark-bot: #0b0814; --screen-text: #f2e9ff; --screen-muted: #8d86a3;
+  }
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ddd; }
+  body { font-family: Barlow, "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 11.5pt; line-height: 1.45; }
+  .page { width: 8.5in; height: 11in; margin: 0 auto; background: var(--paper); position: relative; overflow: hidden; page-break-after: always; padding: 0.6in 0.65in; }
+  .page:last-child { page-break-after: auto; }
+  .page.dark { background: linear-gradient(160deg, var(--dark-top), var(--dark-bot)); color: var(--screen-text); }
+  h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; margin: 0; line-height: 1; }
+  h1 { font-weight: 800; font-size: 64pt; letter-spacing: .01em; }
+  h2 { font-weight: 700; font-size: 30pt; margin-bottom: 14pt; }
+  h3 { font-weight: 700; font-size: 15pt; margin-bottom: 4pt; }
+  .eyebrow { font-family: Barlow, sans-serif; font-size: 8.5pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--lav); }
+  .page:not(.dark) .eyebrow { color: var(--purple); }
+  p { margin: 0 0 8pt; }
+  .muted { color: var(--muted); }
+  .dark .muted { color: var(--screen-muted); }
+  .folio { position: absolute; bottom: 0.4in; left: 0.65in; right: 0.65in; display: flex; justify-content: space-between; font-size: 8.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 6pt; }
+  .dark .folio { border-color: #3a2f55; color: var(--screen-muted); }
+
+  /* cover */
+  .cover-hero { margin: 0.3in 0 0; }
+  .cover-hero svg { width: 100%; height: auto; display: block; }
+  .cover-title { margin-top: 0.15in; }
+  .cover-sub { font-size: 14pt; color: var(--screen-muted); max-width: 5.6in; margin-top: 8pt; }
+  .specs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10pt; margin-top: 0.3in; }
+  .spec { border-top: 2px solid var(--purple); padding-top: 6pt; }
+  .spec b { display: block; font-family: "Barlow Condensed", sans-serif; font-size: 18pt; font-weight: 700; }
+  .spec span { font-size: 9pt; color: var(--screen-muted); }
+
+  /* features */
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt 22pt; margin-top: 6pt; }
+  .feat { border-top: 1px solid var(--line); padding-top: 8pt; }
+  .feat p { font-size: 10.5pt; color: var(--muted); margin: 0; }
+
+  /* screens */
+  .screens { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt 24pt; margin-top: 4pt; }
+  .screens figure { margin: 0; }
+  .screens svg { width: 100%; height: auto; display: block; border-radius: 6px; box-shadow: 0 0 0 4px #000, 0 0 0 5px #333; }
+  .screens figcaption { font-size: 9.5pt; color: var(--screen-muted); margin-top: 8pt; }
+  .lcd { font-family: "Barlow Condensed", sans-serif; font-weight: 700; fill: var(--screen-text); }
+
+  /* how */
+  .flow svg { width: 100%; height: auto; display: block; }
+  .flow text { font-family: Barlow, sans-serif; font-size: 10px; fill: var(--ink); }
+  .flow .t2 { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 14px; }
+  .flow .sm { font-size: 8.5px; fill: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th, td { text-align: left; padding: 4pt 6pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 8pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .two { display: grid; grid-template-columns: 1.15fr 1fr; gap: 20pt; align-items: start; }
+  .exploded svg { width: 100%; height: auto; }
+  .exploded text { font-family: Barlow, sans-serif; font-size: 10px; fill: var(--ink); }
+  .exploded .sm { font-size: 8.5px; fill: var(--muted); }
+  .total { font-family: "Barlow Condensed", sans-serif; font-size: 20pt; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- ============================ PAGE 1: COVER ============================ -->
+<section class="page dark">
+  <div class="eyebrow">Sacramento Kings · Golden 1 Center · Desk model</div>
+  <div class="cover-hero">
+    <svg viewBox="0 0 700 360" role="img" aria-label="The finished piece: the arena on a plinth, purple beam rising, screen showing a live score">
+      <defs>
+        <linearGradient id="beamg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a2f0" stop-opacity="0"/><stop offset=".35" stop-color="#c9a2f0" stop-opacity=".9"/><stop offset="1" stop-color="#e6d3fb"/></linearGradient>
+        <radialGradient id="halo" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#9b5fd6" stop-opacity=".55"/><stop offset="1" stop-color="#9b5fd6" stop-opacity="0"/></radialGradient>
+        <linearGradient id="dome" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d8d4e2"/><stop offset="1" stop-color="#8f8aa3"/></linearGradient>
+        <linearGradient id="wallg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7d7892"/><stop offset=".5" stop-color="#b3aec4"/><stop offset="1" stop-color="#6e6983"/></linearGradient>
+        <linearGradient id="plinthg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6a6580"/><stop offset=".5" stop-color="#9d98b0"/><stop offset="1" stop-color="#5d586f"/></linearGradient>
+        <linearGradient id="lcdg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1030"/><stop offset="1" stop-color="#0b0814"/></linearGradient>
+      </defs>
+      <!-- beam halo -->
+      <ellipse cx="350" cy="120" rx="150" ry="150" fill="url(#halo)"/>
+      <!-- beam -->
+      <rect x="338" y="0" width="24" height="176" fill="url(#beamg)" opacity=".55"/>
+      <rect x="346" y="0" width="8" height="176" fill="url(#beamg)"/>
+      <!-- shadow -->
+      <ellipse cx="350" cy="342" rx="250" ry="12" fill="#000" opacity=".35"/>
+      <!-- plinth -->
+      <rect x="118" y="270" width="464" height="66" rx="8" fill="url(#plinthg)"/>
+      <ellipse cx="350" cy="270" rx="232" ry="14" fill="#c4bfd2"/>
+      <!-- screen in plinth -->
+      <rect x="292" y="284" width="116" height="42" rx="3" fill="#000"/>
+      <rect x="295" y="287" width="110" height="36" rx="2" fill="url(#lcdg)"/>
+      <rect x="299" y="291" width="18" height="6" rx="3" fill="#3a0f1a"/><circle cx="303" cy="294" r="1.6" fill="#ff3b5c"/>
+      <text x="309" y="296" font-size="4" fill="#ff8a9e" font-family="Barlow" font-weight="700">LIVE</text>
+      <text x="350" y="297" text-anchor="middle" font-size="5.5" fill="#f2e9ff" font-family="Barlow Condensed" font-weight="700">Q4 · 2:31</text>
+      <text x="322" y="317" text-anchor="middle" font-size="19" fill="#fff" font-family="Barlow Condensed" font-weight="700">102</text>
+      <text x="378" y="317" text-anchor="middle" font-size="19" fill="#8d86a3" font-family="Barlow Condensed" font-weight="700">98</text>
+      <rect x="300" y="300" width="42" height="1.5" fill="#5a2d81"/><rect x="358" y="300" width="42" height="1.5" fill="#fdb927"/>
+      <!-- arena body: bowl -->
+      <path d="M150 270 C150 205 190 176 350 176 C510 176 550 205 550 270 Z" fill="url(#wallg)"/>
+      <!-- facade ribs -->
+      <g stroke="#4f4a63" stroke-width="1" opacity=".5">
+        <path d="M200 270 C205 225 250 205 350 202"/><path d="M500 270 C495 225 450 205 350 202"/>
+        <path d="M260 270 C262 235 300 218 350 216"/><path d="M440 270 C438 235 400 218 350 216"/>
+        <path d="M170 262 L530 262"/><path d="M160 240 L540 240"/>
+      </g>
+      <!-- roof -->
+      <path d="M190 190 C210 150 300 132 350 132 C400 132 490 150 510 190 C470 178 400 172 350 172 C300 172 230 178 190 190 Z" fill="url(#dome)"/>
+      <ellipse cx="350" cy="176" rx="160" ry="16" fill="#cfcbdb"/>
+      <!-- beam base glow on roof -->
+      <ellipse cx="350" cy="176" rx="26" ry="6" fill="#c9a2f0" opacity=".8"/>
+      <ellipse cx="350" cy="176" rx="12" ry="3" fill="#fff"/>
+      <!-- usb cable hint -->
+      <path d="M582 318 C600 318 610 330 640 330" stroke="#3a3550" stroke-width="3" fill="none"/>
+    </svg>
+  </div>
+  <h1 class="cover-title">LIGHT THE BEAM</h1>
+  <p class="cover-sub">A printed Golden 1 Center that lights its purple beam when the Kings win, with a live scoreboard in the base. WiFi, one USB cable, no soldering.</p>
+  <div class="specs">
+    <div class="spec"><b>230 mm</b><span>across, on a Bambu P1S</span></div>
+    <div class="spec"><b>2.8″ color</b><span>touch screen, LVGL UI</span></div>
+    <div class="spec"><b>15 LEDs</b><span>WS2812B beam, 250 mm tall</span></div>
+    <div class="spec"><b>≈ $41</b><span>hardware, tax in, new</span></div>
+  </div>
+  <div class="folio"><span>Light the Beam · concept overview</span><span>September 2026</span></div>
+</section>
+
+<!-- ============================ PAGE 2: FEATURES ============================ -->
+<section class="page">
+  <div class="eyebrow">What it does</div>
+  <h2>Features</h2>
+  <div class="features">
+    <div class="feat"><h3>Next game, always up</h3><p>Opponent logo, home or away, tipoff in Pacific time, and a countdown. Pulled from ESPN's public schedule; no account or API key.</p></div>
+    <div class="feat"><h3>Live score and clock</h3><p>Score, quarter and game clock refresh every 20 seconds during the game. The leader is drawn in white; the trailer fades to grey. Scores animate when they change.</p></div>
+    <div class="feat"><h3>The beam lights itself on a win</h3><p>When the final goes Kings, purple climbs the tube from the base, like the real one, then holds. It goes dark again before the next game.</p></div>
+    <div class="feat"><h3>Light it yourself</h3><p>Tap the screen to turn the beam on or off any time. Hold for a second to cycle brightness through three levels.</p></div>
+    <div class="feat"><h3>Sleeps at night</h3><p>The screen dims between 11 pm and 7 am, and whenever the board's light sensor sees a dark room.</p></div>
+    <div class="feat"><h3>Phone WiFi setup</h3><p>First boot puts up a "KingsBeam-Setup" network. Join it from a phone, pick your home WiFi, done. Nothing is typed into code.</p></div>
+    <div class="feat"><h3>One cable, no soldering</h3><p>A single USB charger powers the board and the beam. Three lever nuts join the strip to the board's pigtails.</p></div>
+    <div class="feat"><h3>Stock arena, new plinth</h3><p>Dave Lack's Printables arena prints unmodified. A new printed plinth underneath holds the board, the screen window and the cable exit.</p></div>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>2</span></div>
+</section>
+
+<!-- ============================ PAGE 3: SCREENS ============================ -->
+<section class="page dark">
+  <div class="eyebrow">The 320 × 240 display</div>
+  <h2>Three states</h2>
+  <div class="screens">
+    <figure>
+      <svg viewBox="0 0 320 240" role="img" aria-label="Next game screen">
+        <defs><linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1030"/><stop offset="1" stop-color="#0b0814"/></linearGradient></defs>
+        <rect width="320" height="240" fill="url(#g1)"/>
+        <text x="16" y="30" fill="#b48ae6" font-size="11" letter-spacing="2" font-weight="600" font-family="Barlow">NEXT GAME</text>
+        <text x="304" y="30" fill="#8d86a3" font-size="11" text-anchor="end" font-family="Barlow">HOME</text>
+        <circle cx="76" cy="104" r="36" fill="#5a2d81"/><text x="76" y="112" text-anchor="middle" fill="#fff" font-size="22" class="lcd">SAC</text>
+        <text x="160" y="112" text-anchor="middle" fill="#8d86a3" font-size="22" class="lcd">VS</text>
+        <circle cx="244" cy="104" r="36" fill="#552583"/><circle cx="244" cy="104" r="29" fill="#fdb927"/><text x="244" y="112" text-anchor="middle" fill="#552583" font-size="22" class="lcd">LAL</text>
+        <text x="160" y="178" text-anchor="middle" fill="#fff" font-size="24" class="lcd">MON OCT 5 · 7:00 PM</text>
+        <rect x="95" y="196" width="130" height="24" rx="12" fill="#2a1f45"/>
+        <text x="160" y="212" text-anchor="middle" fill="#c9a2f0" font-size="11" font-weight="600" letter-spacing="2" font-family="Barlow">TIPOFF IN 2D 4H</text>
+      </svg>
+      <figcaption><b>Next game.</b> Logos on team-color discs, tipoff in local time, countdown pill. Polled every 10 minutes, every 30 seconds near tipoff.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 320 240" role="img" aria-label="Live screen">
+        <defs><linearGradient id="g2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1030"/><stop offset="1" stop-color="#0b0814"/></linearGradient></defs>
+        <rect width="320" height="240" fill="url(#g2)"/>
+        <rect x="16" y="16" width="56" height="20" rx="10" fill="#3a0f1a"/><circle cx="28" cy="26" r="4" fill="#ff3b5c"/>
+        <text x="40" y="30" fill="#ff8a9e" font-size="11" font-weight="700" letter-spacing="1" font-family="Barlow">LIVE</text>
+        <text x="160" y="31" text-anchor="middle" fill="#fff" font-size="18" class="lcd">Q4  ·  2:31</text>
+        <rect x="16" y="56" width="136" height="4" rx="2" fill="#5a2d81"/><rect x="168" y="56" width="136" height="4" rx="2" fill="#fdb927"/>
+        <text x="84" y="84" text-anchor="middle" fill="#b48ae6" font-size="14" font-weight="600" letter-spacing="2" font-family="Barlow">SAC</text>
+        <text x="236" y="84" text-anchor="middle" fill="#8d86a3" font-size="14" font-weight="600" letter-spacing="2" font-family="Barlow">LAL</text>
+        <text x="84" y="170" text-anchor="middle" fill="#fff" font-size="84" class="lcd">102</text>
+        <text x="236" y="170" text-anchor="middle" fill="#8d86a3" font-size="84" class="lcd">98</text>
+        <rect x="76" y="192" width="16" height="4" rx="2" fill="#b48ae6"/>
+        <text x="160" y="224" text-anchor="middle" fill="#8d86a3" font-size="11" font-family="Barlow">GOLDEN 1 CENTER · SACRAMENTO</text>
+      </svg>
+      <figcaption><b>Live.</b> Pulsing pill, quarter and clock, team color bars, 84-pixel scores. Handles halftime, end of quarter and overtime.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 320 240" role="img" aria-label="Final screen after a win">
+        <defs>
+          <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a1550"/><stop offset="1" stop-color="#0b0814"/></linearGradient>
+          <linearGradient id="bv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9a2f0" stop-opacity="0"/><stop offset="1" stop-color="#c9a2f0"/></linearGradient>
+        </defs>
+        <rect width="320" height="240" fill="url(#g3)"/>
+        <rect x="149" y="0" width="22" height="240" fill="url(#bv)" opacity=".4"/><rect x="158" y="0" width="4" height="240" fill="#e6d3fb" opacity=".5"/>
+        <text x="16" y="30" fill="#b48ae6" font-size="11" letter-spacing="2" font-weight="600" font-family="Barlow">FINAL</text>
+        <text x="304" y="30" fill="#8d86a3" font-size="11" text-anchor="end" font-family="Barlow">KINGS WIN</text>
+        <text x="84" y="92" text-anchor="middle" fill="#fff" font-size="44" class="lcd">112</text>
+        <text x="236" y="92" text-anchor="middle" fill="#8d86a3" font-size="44" class="lcd">108</text>
+        <text x="84" y="114" text-anchor="middle" fill="#b48ae6" font-size="11" letter-spacing="2" font-family="Barlow">SAC</text>
+        <text x="236" y="114" text-anchor="middle" fill="#8d86a3" font-size="11" letter-spacing="2" font-family="Barlow">LAL</text>
+        <text x="160" y="188" text-anchor="middle" fill="#f2e9ff" font-size="40" letter-spacing="3" class="lcd">LIGHT THE BEAM</text>
+        <text x="160" y="222" text-anchor="middle" fill="#8d86a3" font-size="11" font-family="Barlow">BEAM IS LIT · TAP TO TURN OFF</text>
+      </svg>
+      <figcaption><b>Final, Kings win.</b> A beam glow climbs the screen while the real one rises. On a loss: the score, "NEXT TIME", and a tap still lights it.</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 320 240" role="img" aria-label="WiFi setup screen">
+        <defs><linearGradient id="g4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1a1030"/><stop offset="1" stop-color="#0b0814"/></linearGradient></defs>
+        <rect width="320" height="240" fill="url(#g4)"/>
+        <text x="16" y="30" fill="#b48ae6" font-size="11" letter-spacing="2" font-weight="600" font-family="Barlow">WIFI SETUP</text>
+        <text x="160" y="66" text-anchor="middle" fill="#fff" font-size="22" class="lcd">CONNECT ME TO WIFI</text>
+        <g fill="#f2e9ff" font-size="13" font-family="Barlow Condensed" font-weight="600">
+          <text x="16" y="106">1.  On your phone, join the WiFi network "KingsBeam-Setup"</text>
+          <text x="16" y="134">2.  A setup page opens (or visit 192.168.4.1)</text>
+          <text x="16" y="162">3.  Pick your home WiFi and enter its password</text>
+          <text x="16" y="190">4.  Done. This screen changes when it connects.</text>
+        </g>
+      </svg>
+      <figcaption><b>First boot.</b> No credentials in code; the board runs a small setup page on its own network until it knows your WiFi.</figcaption>
+    </figure>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>3</span></div>
+</section>
+
+<!-- ============================ PAGE 4: HOW IT WORKS ============================ -->
+<section class="page">
+  <div class="eyebrow">Under the roof</div>
+  <h2>How it works</h2>
+  <figure class="flow" style="margin:0 0 14pt">
+    <svg viewBox="0 0 700 250" role="img" aria-label="Data flow: ESPN's public API over WiFi into the ESP32 board, which drives the screen and the LED beam">
+      <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6b6482"/></marker></defs>
+      <!-- ESPN -->
+      <rect x="20" y="70" width="150" height="70" rx="6" fill="#f4f2f8" stroke="#d9d5e4"/>
+      <text x="95" y="98" text-anchor="middle" class="t2">ESPN public API</text>
+      <text x="95" y="116" text-anchor="middle" class="sm">site.api.espn.com/.../teams/sac</text>
+      <text x="95" y="129" text-anchor="middle" class="sm">next or live game, ~21 KB JSON</text>
+      <!-- arrow -->
+      <line x1="170" y1="105" x2="270" y2="105" stroke="#6b6482" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="220" y="96" text-anchor="middle" class="sm">HTTPS GET over home WiFi</text>
+      <text x="220" y="120" text-anchor="middle" class="sm">10 min · 30 s · 20 s · 5 min</text>
+      <!-- ESP32 -->
+      <rect x="272" y="40" width="170" height="130" rx="6" fill="#efe6fa" stroke="#b48ae6"/>
+      <text x="357" y="66" text-anchor="middle" class="t2">ESP32 board (CYD)</text>
+      <text x="357" y="86" text-anchor="middle">filtered JSON parse → GameState</text>
+      <text x="357" y="102" text-anchor="middle">pre / live / post state machine</text>
+      <text x="357" y="118" text-anchor="middle">NTP clock, Pacific time</text>
+      <text x="357" y="134" text-anchor="middle">touch: tap = beam, hold = brightness</text>
+      <text x="357" y="150" text-anchor="middle">light sensor → night dimming</text>
+      <!-- screen -->
+      <line x1="442" y1="80" x2="530" y2="60" stroke="#6b6482" stroke-width="1.5" marker-end="url(#arr)"/>
+      <rect x="532" y="30" width="150" height="60" rx="6" fill="#0e0a1a"/>
+      <text x="607" y="56" text-anchor="middle" class="t2" fill="#f2e9ff" style="fill:#f2e9ff">2.8″ TFT, 320×240</text>
+      <text x="607" y="74" text-anchor="middle" class="sm" style="fill:#8d86a3">LVGL 9 · Barlow Condensed · logos</text>
+      <!-- beam -->
+      <line x1="442" y1="130" x2="530" y2="160" stroke="#6b6482" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="486" y="158" text-anchor="middle" class="sm">GPIO 22, WS2812B data</text>
+      <rect x="532" y="130" width="150" height="60" rx="6" fill="#5a2d81"/>
+      <text x="607" y="156" text-anchor="middle" class="t2" style="fill:#fff">Beam · 15 LEDs</text>
+      <text x="607" y="174" text-anchor="middle" class="sm" style="fill:#d9c2f2">off · pulse · rise · hold</text>
+      <!-- power -->
+      <rect x="272" y="200" width="170" height="34" rx="6" fill="#fff" stroke="#d9d5e4"/>
+      <text x="357" y="221" text-anchor="middle">5 V 2 A USB charger → board VIN → strip</text>
+      <line x1="357" y1="200" x2="357" y2="172" stroke="#6b6482" stroke-width="1.5" marker-end="url(#arr)"/>
+    </svg>
+    <figcaption class="muted" style="font-size:9.5pt">One request returns everything: the next event carries the date, opponent, status, score, clock and winner. The board only keeps the dozen fields it draws.</figcaption>
+  </figure>
+  <div class="two">
+    <div>
+      <h3>Poll cadence</h3>
+      <table>
+        <tr><th>State</th><th>Every</th><th>Beam</th></tr>
+        <tr><td>Next game, far off</td><td>10 min</td><td>off</td></tr>
+        <tr><td>Within 20 min of tipoff</td><td>30 s</td><td>off</td></tr>
+        <tr><td>Live</td><td>20 s</td><td>dim purple pulse</td></tr>
+        <tr><td>Final, Kings win</td><td>5 min</td><td>rise, then hold up to 12 h</td></tr>
+        <tr><td>Final, loss</td><td>5 min</td><td>off (tap still lights it)</td></tr>
+        <tr><td>ESPN unreachable</td><td>60 s retry</td><td>unchanged, "offline" badge</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Things learned building it</h3>
+      <p class="muted" style="font-size:10pt">ESPN's edge rejects browser-style user agents from non-browser clients with a 403, but accepts the ESP32 library's own default. The firmware never spoofs a browser.</p>
+      <p class="muted" style="font-size:10pt">The JSON nests fourteen levels deep. ArduinoJson's default limit is ten; the parser raises it and checks for the team object, since a filtered parse reports success on an HTML error page.</p>
+      <p class="muted" style="font-size:10pt">Fonts are converted from TTF to LVGL's bitmap format with a small Python script, so the build needs no Node toolchain.</p>
+    </div>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>4</span></div>
+</section>
+
+<!-- ============================ PAGE 5: PARTS ============================ -->
+<section class="page">
+  <div class="eyebrow">Shopping and printing</div>
+  <h2>Parts and print list</h2>
+  <div class="two">
+    <div>
+      <table>
+        <tr><th>Hardware</th><th class="num">Price</th></tr>
+        <tr><td>ESP32-2432S028R 2.8″ touch display board (Amazon)</td><td class="num">~$14</td></tr>
+        <tr><td>WS2812B 5 V strip, 60/m, 1 m, IP30 (Amazon)</td><td class="num">~$9</td></tr>
+        <tr><td>5 V 2 A USB wall charger (Amazon or Best Buy)</td><td class="num">~$7</td></tr>
+        <tr><td>WAGO 221-413 lever nuts ×3 (Lowe's Bayshore or Amazon)</td><td class="num">~$8</td></tr>
+        <tr><td class="muted">SF sales tax 8.625 %</td><td class="num muted">~$3.30</td></tr>
+        <tr><td class="total">Hardware total</td><td class="num total">≈ $41</td></tr>
+      </table>
+      <p class="muted" style="font-size:9.5pt;margin-top:6pt">Optional: USB-C panel-mount jack for the back (~$9), level shifter if LED 1 flickers ($1.50). Prices are September 2026 estimates; links and local stores are in <code>docs/bom.md</code>.</p>
+      <table style="margin-top:12pt">
+        <tr><th>Filament (P1S)</th><th class="num">Price</th></tr>
+        <tr><td>Bambu PLA Basic Silver, 1 kg: arena, lid, plinth (~450 g)</td><td class="num">$18.99</td></tr>
+        <tr><td>White PLA, any brand: beam tube (~20 g, vase mode)</td><td class="num">$13–19</td></tr>
+      </table>
+      <table style="margin-top:12pt">
+        <tr><th>Print</th><th>Settings</th><th class="num">Time</th></tr>
+        <tr><td>Arena base, 220 mm</td><td>0.2 mm, 3 walls, 15 %, no supports</td><td class="num">~9 h</td></tr>
+        <tr><td>Arena lid (no-hole, cut 12.4 mm)</td><td>0.15 mm</td><td class="num">~2 h</td></tr>
+        <tr><td>Plinth test slice</td><td>0.2 mm</td><td class="num">40 min</td></tr>
+        <tr><td>Plinth body + lid</td><td>0.2 mm, upside down, 15 % gyroid</td><td class="num">~5 h</td></tr>
+        <tr><td>Beam tube, 250 mm</td><td>white, vase mode, 0.4 nozzle</td><td class="num">~1 h</td></tr>
+        <tr><td>Spine + socket</td><td>any</td><td class="num">20 min</td></tr>
+      </table>
+    </div>
+    <figure class="exploded" style="margin:0">
+      <svg viewBox="0 0 300 470" role="img" aria-label="Exploded view: beam tube, arena lid, arena base with strip socket, plinth with the display board, bottom lid">
+        <defs><linearGradient id="bt" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e6d3fb"/><stop offset="1" stop-color="#c9a2f0"/></linearGradient></defs>
+        <!-- tube -->
+        <rect x="144" y="10" width="12" height="110" rx="6" fill="url(#bt)"/><rect x="140" y="118" width="20" height="4" fill="#c9a2f0"/>
+        <text x="170" y="40">beam tube, white PLA</text><text x="170" y="52" class="sm">15-LED strip on a spine inside</text>
+        <!-- lid -->
+        <path d="M60 175 C80 145 130 138 150 138 C170 138 220 145 240 175 Z" fill="#cfcbdb" stroke="#8f8aa3"/>
+        <circle cx="150" cy="168" r="7" fill="#fff" stroke="#8f8aa3"/>
+        <text x="20" y="150">arena lid</text><text x="20" y="162" class="sm">12.4 mm hole</text>
+        <!-- base -->
+        <path d="M50 260 C50 220 90 205 150 205 C210 205 250 220 250 260 Z" fill="#b3aec4" stroke="#6e6983"/>
+        <rect x="138" y="246" width="24" height="8" rx="2" fill="#5a2d81"/>
+        <text x="20" y="235">arena base, 220 mm</text><text x="20" y="247" class="sm">stock Printables file</text>
+        <text x="170" y="256" class="sm">tube socket, glued</text>
+        <!-- plinth -->
+        <rect x="35" y="300" width="230" height="60" rx="6" fill="#9d98b0" stroke="#5d586f"/>
+        <rect x="100" y="312" width="100" height="36" rx="3" fill="#0e0a1a"/>
+        <text x="150" y="335" text-anchor="middle" fill="#f2e9ff" font-family="Barlow Condensed" font-weight="700" font-size="13">SAC 102 · LAL 98</text>
+        <text x="20" y="380">plinth, 230 × 50 mm</text><text x="20" y="392" class="sm">board in a tilted pocket behind the window</text>
+        <text x="20" y="404" class="sm">WAGO nuts and cable inside; slot or USB-C jack at back</text>
+        <!-- bottom lid -->
+        <rect x="45" y="430" width="210" height="10" rx="3" fill="#c4bfd2" stroke="#8f8aa3"/>
+        <text x="20" y="458">press-fit bottom lid</text>
+        <!-- dashed alignment -->
+        <line x1="150" y1="122" x2="150" y2="430" stroke="#b48ae6" stroke-dasharray="3 4" stroke-width="1"/>
+      </svg>
+    </figure>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>5</span></div>
+</section>
+</body>
+</html>
