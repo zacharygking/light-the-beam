@@ -85,12 +85,11 @@ function makePlinth({ cutaway = false } = {}) {
   // recess ring on top (where the arena sits)
   const ring = mesh(new THREE.TorusGeometry(110.5, 1.2, 8, 128), M.silverDark, { cast: false });
   ring.rotation.x = Math.PI / 2; ring.position.y = h + 0.2; g.add(ring);
-  // tilted screen bezel + screen on the front (+Z)
-  const win = new THREE.Group();
-  win.position.set(0, 24, 108); win.rotation.x = THREE.MathUtils.degToRad(-20);
-  const bezel = mesh(new THREE.BoxGeometry(66, 52, 10), M.black); win.add(bezel);
-  const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial());
-  screen.position.z = 5.1; win.add(screen);
+  // flat facet on the front of the drum; the screen sits recessed in it
+  const facet = mesh(new THREE.BoxGeometry(74, 50, 16), M.silver); facet.position.set(0, 25, 104); g.add(facet);
+  const win = new THREE.Group(); win.position.set(0, 25, 112);
+  const bezel = mesh(new THREE.BoxGeometry(62, 46, 4), M.black); bezel.position.z = 1; win.add(bezel);   // 1 mm proud of the facet
+  const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial()); screen.position.z = 3.05; win.add(screen);
   g.add(win);
   // cable out the back
   const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 12, -110), new THREE.Vector3(0, 8, -150), new THREE.Vector3(30, 2, -210), new THREE.Vector3(120, 1.5, -260)]);
@@ -109,35 +108,67 @@ function makeBoard() {
   return g;
 }
 
+// Golden 1 Center footprint (mm, for the 220 mm print): a shield-shaped polygon with a flat
+// back edge and an angled prow at the front. Shape y is -world z (front = shape -y).
+const OUTLINE = [
+  [-52, 96], [52, 96],            // flat back edge
+  [92, 72], [108, 22],            // right shoulder
+  [100, -34], [64, -84],          // right flank
+  [18, -104], [-18, -104],        // prow (front)
+  [-64, -84], [-100, -34],        // left flank
+  [-108, 22], [-92, 72],          // left shoulder
+];
+function outlineShape(scale = 1) {
+  const sh = new THREE.Shape();
+  OUTLINE.forEach((pt, i) => { const x = pt[0] * scale, y = pt[1] * scale; i ? sh.lineTo(x, y) : sh.moveTo(x, y); });
+  sh.closePath();
+  return sh;
+}
+// vertical extrusion of the outline from y0 to y1
+const twoSided = new Map();
+function ds(mat) { if (!twoSided.has(mat)) { const c = mat.clone(); c.side = THREE.DoubleSide; twoSided.set(mat, c); } return twoSided.get(mat); }
+function slab(scale, y0, y1, mat, opts) {
+  const g = new THREE.ExtrudeGeometry(outlineShape(scale), { depth: y1 - y0, bevelEnabled: false, curveSegments: 1 });
+  const m = mesh(g, ds(mat), opts); m.rotation.x = -Math.PI / 2; m.position.y = y0; return m;
+}
 function makeArenaBase() {
-  // open bowl; the roof is a separate cap so exploded views can lift it
-  const pts = [[0, 0], [108, 0], [114, 20], [116, 40], [112, 56], [104, 66], [98, 70], [95, 70], [101, 66], [109, 56], [112, 40], [110, 20], [104, 3], [0, 3]].map(p => new THREE.Vector2(p[0], p[1]));
   const g = new THREE.Group();
-  const bowl = mesh(new THREE.LatheGeometry(pts, 160), M.silver); g.add(bowl);
-  // glass band
-  const band = mesh(new THREE.LatheGeometry([[115.4, 30], [116.6, 40], [114.2, 49]].map(p => new THREE.Vector2(p[0], p[1])), 160), M.glass, { cast: false });
-  g.add(band);
-  // horizontal facade lines
-  for (const y of [12, 20, 58, 63]) {
-    const rr = y < 30 ? 109 + y * 0.3 : (y < 60 ? 110.5 : 106);
-    const t = mesh(new THREE.TorusGeometry(rr, 0.5, 6, 160), M.silverDark, { cast: false });
-    t.rotation.x = Math.PI / 2; t.position.y = y; g.add(t);
+  g.add(slab(1.0, 0, 3, M.silver));            // floor
+  g.add(slab(0.985, 3, 26, M.glass));          // lower glass storey
+  g.add(slab(1.0, 26, 54, M.glass));           // upper storey: dark glass behind the fins
+  g.add(slab(1.07, 54, 60, M.silver));         // roof overhang
+  // facade fins every ~9 mm around the outline, full height, standing proud of the wall
+  const n = OUTLINE.length;
+  for (let i = 0; i < n; i++) {
+    const a = OUTLINE[i], b = OUTLINE[(i + 1) % n];
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy), count = Math.max(2, Math.round(len / 9));
+    const ang = Math.atan2(dx, -dy);   // fin faces outward
+    for (let k = 0; k <= count; k++) {
+      const t = k / count;
+      if (i > 0 && k === 0) continue;
+      const fin = mesh(new THREE.BoxGeometry(2.4, 50, 2.4), M.silverDark);
+      fin.position.set(a[0] + dx * t, 4 + 25, -(a[1] + dy * t));
+      fin.rotation.y = -ang; g.add(fin);
+    }
   }
+  // hangar-door bay on the flat back edge
+  const bay = mesh(new THREE.BoxGeometry(70, 20, 3), M.glass); bay.position.set(0, 16, -96.5); g.add(bay);
   return g;
 }
 
 function makeRoof() {
-  const pts = [[0, 0], [97, 0], [97, 4], [92, 4], [78, 7], [56, 9.2], [30, 10.6], [10, 11.2], [0, 11.3]].map(p => new THREE.Vector2(p[0], p[1]));
+  // the lid: a plate over the overhang, a raised inner panel with roof seams, and the beam hole
   const g = new THREE.Group();
-  g.add(mesh(new THREE.LatheGeometry(pts, 160), M.silver));
-  // roof panel seams
-  for (const rr of [30, 55, 78]) {
-    const t = mesh(new THREE.TorusGeometry(rr, 0.45, 6, 128), M.silverDark, { cast: false });
-    t.rotation.x = Math.PI / 2; t.position.y = 11.4 - rr * 0.045; g.add(t);
-  }
-  // hole ring + glow at the beam
+  g.add(slab(1.07, 0, 4, M.silver));
+  g.add(slab(0.82, 4, 9, M.silver));
+  // seams: a grid across the inner panel
+  const seam = M.silverDark;
+  for (let x = -60; x <= 60; x += 24) { const b = mesh(new THREE.BoxGeometry(0.8, 0.6, 130), seam, { cast: false }); b.position.set(x, 9.2, 4); g.add(b); }
+  for (let z = -60; z <= 70; z += 24) { const b = mesh(new THREE.BoxGeometry(150, 0.6, 0.8), seam, { cast: false }); b.position.set(0, 9.2, z); g.add(b); }
+  // rooftop plant
+  for (const [x, z, w, d] of [[-55, 60, 14, 10], [60, 50, 12, 12], [40, -70, 10, 8]]) { const b = mesh(new THREE.BoxGeometry(w, 4, d), M.silverDark); b.position.set(x, 11, z); g.add(b); }
   const hole = mesh(new THREE.TorusGeometry(7.2, 1, 8, 48), M.silverDark, { cast: false });
-  hole.rotation.x = Math.PI / 2; hole.position.y = 11.3; g.add(hole);
+  hole.rotation.x = Math.PI / 2; hole.position.y = 9.3; g.add(hole);
   return g;
 }
 
@@ -261,15 +292,15 @@ ground.rotation.x = -Math.PI / 2; scene.add(ground);
 const camera = new THREE.PerspectiveCamera(30, W / H, 5, 5000);
 function look(px, py, pz, tx, ty, tz, fov = 30) { camera.fov = fov; camera.position.set(px, py, pz); camera.lookAt(tx, ty, tz); camera.updateProjectionMatrix(); }
 
-const ARENA_Y = 50, ROOF_Y = ARENA_Y + 70, TUBE_Y = ARENA_Y + 3 + 8;   // tube foot sits in the socket on the arena floor
+const ARENA_Y = 50, ROOF_Y = ARENA_Y + 60, TUBE_Y = ARENA_Y + 3 + 8;   // tube foot sits in the socket on the arena floor
 
 if (VIEW === 'hero' || VIEW === 'screen') {
   const plinth = makePlinth(); scene.add(plinth);
   const base = makeArenaBase(); base.position.y = ARENA_Y; scene.add(base);
   const roof = makeRoof(); roof.position.y = ROOF_Y; scene.add(roof);
   const tube = makeTube(); tube.position.y = TUBE_Y; scene.add(tube);
-  if (VIEW === 'hero') look(330, 235, 560, 0, 135, 0, 33);
-  else look(90, 90, 300, 0, 45, 60, 26);
+  if (VIEW === 'hero') look(320, 300, 540, 0, 115, 0, 33);
+  else look(110, 80, 300, 0, 40, 70, 24);
 }
 
 if (VIEW === 'exploded') {
@@ -308,7 +339,7 @@ if (VIEW === 'strip') {
 
 if (VIEW === 'cutaway') {
   const plinth = makePlinth({ cutaway: true }); scene.add(plinth);
-  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.rotation.z = 0; board.position.set(0, 24, 100); scene.add(board);
+  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(90); board.position.set(0, 25, 101); scene.add(board);
   for (let i = 0; i < 3; i++) { const w = makeWago(); w.position.set(-40 + i * 22, 4.5, -60); scene.add(w); }
   scene.add(wire([[-30, 8, -62], [-20, 20, -20], [-10, 30, 40], [-5, 34, 88]], M.wireRed));
   scene.add(wire([[-8, 8, -62], [0, 22, -20], [5, 32, 40], [8, 36, 88]], M.wireWhite));
@@ -333,7 +364,7 @@ if (VIEW === 'wiring') {
 
 if (VIEW === 'lid') {
   const base = makeArenaBase(); scene.add(base);
-  const roof = makeRoof(); roof.position.y = 70 + 40; scene.add(roof);
+  const roof = makeRoof(); roof.position.y = 60 + 40; scene.add(roof);
   const socket = makeSocket(); socket.position.y = 3; scene.add(socket);
   const tube = makeTube({ ghost: false, glow: false }); tube.position.y = 11; scene.add(tube);
   look(230, 260, 300, 0, 90, 0, 32);
