@@ -1,0 +1,32 @@
+<title>Beam Renders</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;600&display=swap">
+<style>
+  :root { --bg:#f4f2f8; --ink:#1d1830; --muted:#6b6482; --accent:#5a2d81; --surface:#fff; --line:#d9d5e4; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#15121e; --ink:#eee9f6; --muted:#a49db8; --accent:#b98be6; --surface:#1f1a2b; --line:#36304a; } }
+  :root[data-theme="dark"] { --bg:#15121e; --ink:#eee9f6; --muted:#a49db8; --accent:#b98be6; --surface:#1f1a2b; --line:#36304a; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Barlow,"Helvetica Neue",Arial,sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; padding-block:28px 48px; padding-inline:20px; }
+  h1 { font-family:"Barlow Condensed","Arial Narrow",sans-serif; font-size:36px; margin:0 0 4px; line-height:1; }
+  .lede { color:var(--muted); margin:0 0 22px; max-width:62ch; }
+  .hero img { width:100%; display:block; border-radius:8px; }
+  .hero figcaption, .grid figcaption { font-size:13px; color:var(--muted); margin-top:6px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; margin-top:24px; }
+  figure { margin:0; }
+  .grid img { width:100%; display:block; border-radius:6px; }
+  b { color:var(--ink); font-weight:600; }
+</style>
+<div class="wrap">
+  <h1>Light the Beam renders</h1>
+  <p class="lede">Rendered from the three.js scene in <b>docs/render/scene.html</b> with headless Chrome. The arena is a stylized stand-in until the Printables mesh is downloaded; the plinth, board, beam and wiring are to size.</p>
+  <figure class="hero"><img src="hero.png" alt="The finished piece: arena on its plinth, purple beam rising, live score on the screen"><figcaption><b>Hero.</b> Cover of the overview PDF.</figcaption></figure>
+  <div class="grid">
+    <figure><img src="exploded.png" alt="Exploded stack"><figcaption><b>Exploded.</b> Tube and spine, lid, base with socket, plinth, bottom lid.</figcaption></figure>
+    <figure><img src="cutaway.png" alt="Plinth cutaway"><figcaption><b>Cutaway.</b> Board tilted behind the window, WAGO nuts inside.</figcaption></figure>
+    <figure><img src="screen.png" alt="Screen close-up"><figcaption><b>Screen.</b> Live layout on the tilted 2.8" display.</figcaption></figure>
+    <figure><img src="beam.png" alt="Beam assembly"><figcaption><b>Beam.</b> Strip on its spine inside the ghosted tube, socket below.</figcaption></figure>
+    <figure><img src="strip.png" alt="Cut strip"><figcaption><b>Step 1.</b> Strip cut to 15 LEDs beside the spine.</figcaption></figure>
+    <figure><img src="wiring.png" alt="Wiring"><figcaption><b>Step 6.</b> Three lever nuts between the board pigtails and the strip.</figcaption></figure>
+    <figure><img src="lid.png" alt="Lid over tube"><figcaption><b>Steps 3–4.</b> Tube standing in the socket, lid lowered over it.</figcaption></figure>
+    <figure><img src="plinth_top.png" alt="Arena onto plinth"><figcaption><b>Step 7.</b> Arena lowered onto the plinth recess.</figcaption></figure>
+  </div>
+</div>
