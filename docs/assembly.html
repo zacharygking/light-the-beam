@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Light the Beam · Assembly Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  :root { --purple:#5a2d81; --lav:#b48ae6; --ink:#1d1830; --muted:#6b6482; --line:#d9d5e4; --paper:#fff; --tint:#f4f2f8; --dark:#0e0a1a; --warn:#b4521e; --warn-bg:#fff3ea; }
+  @page { size: letter; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #ddd; }
+  body { font-family: Barlow, "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 11pt; line-height: 1.45; }
+  .page { width: 8.5in; height: 11in; margin: 0 auto; background: var(--paper); position: relative; overflow: hidden; page-break-after: always; padding: 0.55in 0.6in 0.7in; }
+  .page:last-child { page-break-after: auto; }
+  .page.dark { background: var(--dark); color: #f2e9ff; }
+  h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; margin: 0; line-height: 1; }
+  h1 { font-weight: 800; font-size: 54pt; }
+  h2 { font-weight: 700; font-size: 26pt; margin-bottom: 10pt; }
+  h3 { font-weight: 700; font-size: 14pt; margin-bottom: 3pt; }
+  .eyebrow { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--purple); }
+  .dark .eyebrow { color: var(--lav); }
+  p { margin: 0 0 6pt; }
+  .muted { color: var(--muted); }
+  .folio { position: absolute; bottom: 0.38in; left: 0.6in; right: 0.6in; display: flex; justify-content: space-between; font-size: 8pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 5pt; }
+  .dark .folio { border-color: #3a2f55; color: #8d86a3; }
+  img.render { width: 100%; display: block; border-radius: 4px; background: var(--dark); }
+
+  /* cover */
+  .cover-img { margin: 0.2in -0.6in 0; width: 8.5in; }
+  .cover-img img { width: 100%; display: block; }
+  .cover-block { position: absolute; left: 0.6in; right: 0.6in; bottom: 0.9in; }
+  .cover-block h1 { color: #fff; }
+  .cover-block p { color: #b9b0d0; font-size: 13pt; max-width: 5in; margin-top: 8pt; }
+  .badge { display: inline-block; border: 1px solid var(--lav); color: var(--lav); border-radius: 3px; padding: 2pt 8pt; font-size: 8.5pt; letter-spacing: .12em; text-transform: uppercase; font-weight: 600; margin-top: 14pt; }
+
+  /* in the box */
+  .parts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12pt 16pt; margin-top: 6pt; }
+  .part { border: 1px solid var(--line); border-radius: 4px; padding: 10pt 12pt; min-height: 1.1in; }
+  .part .n { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 20pt; color: var(--purple); line-height: 1; }
+  .part b { display: block; font-size: 11pt; margin-top: 4pt; }
+  .part span { font-size: 9.5pt; color: var(--muted); display: block; }
+  .tools { margin-top: 14pt; display: grid; grid-template-columns: 1fr 1fr; gap: 6pt 20pt; font-size: 10.5pt; }
+  .tools div::before { content: "✓  "; color: var(--purple); font-weight: 700; }
+
+  /* steps */
+  .step { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; align-items: start; margin-bottom: 14pt; }
+  .step.full { grid-template-columns: 1fr; }
+  .num { font-family: "Barlow Condensed", sans-serif; font-weight: 800; font-size: 44pt; color: var(--purple); line-height: .9; }
+  .step h3 { font-size: 17pt; margin: 4pt 0 6pt; }
+  .step ol { margin: 0; padding-left: 16pt; font-size: 10.5pt; }
+  .step li { margin-bottom: 4pt; }
+  .note { background: var(--tint); border-left: 3px solid var(--lav); padding: 6pt 10pt; font-size: 9.5pt; margin-top: 6pt; }
+  .warn { background: var(--warn-bg); border-left: 3px solid var(--warn); padding: 6pt 10pt; font-size: 9.5pt; margin-top: 6pt; }
+  .warn b, .note b { font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+  th, td { text-align: left; padding: 4pt 6pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 7.5pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  code { font-family: Menlo, Consolas, monospace; font-size: 9pt; background: var(--tint); padding: 1pt 4pt; border-radius: 2px; }
+  .wire { display: inline-block; width: 10pt; height: 10pt; border-radius: 2pt; vertical-align: -1.5pt; margin-right: 4pt; border: 1px solid rgba(0,0,0,.15); }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 18pt; }
+  .kv { font-size: 10pt; }
+  .kv div { display: grid; grid-template-columns: 1.3in 1fr; padding: 4pt 0; border-bottom: 1px solid var(--line); }
+  .kv div span:first-child { color: var(--muted); font-size: 8pt; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; padding-top: 2pt; }
+</style>
+</head>
+<body>
+
+<!-- ============================ COVER ============================ -->
+<section class="page dark" style="padding:0.55in 0.6in 0">
+  <div class="eyebrow">Sacramento Kings · Golden 1 Center · Model Kit</div>
+  <div class="cover-img"><img src="render/hero.png" alt="The finished model"></div>
+  <div class="cover-block">
+    <h1>LIGHT THE BEAM</h1>
+    <p>Assembly and setup guide. About 45 minutes once the parts are printed. No soldering, no software to install.</p>
+    <span class="badge">Read all steps before you start</span>
+  </div>
+  <div class="folio"><span>Light the Beam · Assembly Guide · v0.1</span><span>September 2026</span></div>
+</section>
+
+<!-- ============================ IN THE BOX ============================ -->
+<section class="page">
+  <div class="eyebrow">Before you begin</div>
+  <h2>What's in the box</h2>
+  <div class="parts">
+    <div class="part"><div class="n">A</div><b>Arena base, 220 mm</b><span>silver PLA · from Printables</span></div>
+    <div class="part"><div class="n">B</div><b>Arena lid</b><span>silver PLA · 12.4 mm beam hole</span></div>
+    <div class="part"><div class="n">C</div><b>Plinth</b><span>silver PLA · screen window at front</span></div>
+    <div class="part"><div class="n">D</div><b>Plinth bottom lid</b><span>silver PLA · press fit</span></div>
+    <div class="part"><div class="n">E</div><b>Beam tube, 250 mm</b><span>white PLA · single wall</span></div>
+    <div class="part"><div class="n">F</div><b>Strip spine</b><span>white PLA · 10 × 262 mm bar</span></div>
+    <div class="part"><div class="n">G</div><b>Tube socket</b><span>white PLA · 30 mm puck</span></div>
+    <div class="part"><div class="n">H</div><b>Display board</b><span>ESP32-2432S028R with USB cable and pigtail leads</span></div>
+    <div class="part"><div class="n">I</div><b>LED strip, 1 m</b><span>WS2812B 5 V, 60 LEDs/m · you'll use 15 LEDs</span></div>
+    <div class="part"><div class="n">J</div><b>3 × lever connectors</b><span>WAGO 221-413</span></div>
+    <div class="part"><div class="n">K</div><b>USB power adapter</b><span>5 V, 2 A or more</span></div>
+    <div class="part"><div class="n">—</div><b>Optional</b><span>USB-C panel-mount jack · 74AHCT125 level shifter</span></div>
+  </div>
+  <h3 style="margin-top:16pt">You will need</h3>
+  <div class="tools">
+    <div>Scissors or flush cutters (for the LED strip)</div>
+    <div>Hot glue gun, or a few dots of super glue</div>
+    <div>A phone, for the one-time WiFi setup</div>
+    <div>Optional: small flat screwdriver for the lever nuts</div>
+  </div>
+  <div class="note" style="margin-top:14pt"><b>Printing the parts yourself?</b> Print settings and times are on page 9. Print the plinth's front test slice first and check that the display board fits before committing to the full plinth.</div>
+  <div class="folio"><span>Light the Beam</span><span>2</span></div>
+</section>
+
+<!-- ============================ STEPS 1-2 ============================ -->
+<section class="page">
+  <div class="eyebrow">Assembly</div>
+  <h2>The beam</h2>
+  <div class="step">
+    <div>
+      <div class="num">1</div>
+      <h3>Cut the strip to 15 LEDs</h3>
+      <ol>
+        <li>Unroll the LED strip. Starting from the end with the <b>wires attached</b>, count 15 LEDs.</li>
+        <li>Cut across the copper pads <b>after</b> the 15th LED, on the printed cut line.</li>
+        <li>Note the arrow printed on the strip: it points away from the wired end. Data flows that way.</li>
+      </ol>
+      <div class="note"><b>Keep the wired end.</b> The three leads (red 5V, green data, white or black ground) are what you'll connect in step 6.</div>
+    </div>
+    <img class="render" src="render/strip.png" alt="Strip cut to 15 LEDs next to the spine">
+  </div>
+  <div class="step">
+    <div>
+      <div class="num">2</div>
+      <h3>Stick the strip to the spine, slide into the tube</h3>
+      <ol>
+        <li>Peel the strip's backing and press it onto the flat face of spine <b>F</b>, wired end at the notched bottom.</li>
+        <li>Feed the leads through the notch, then slide the spine into tube <b>E</b> from the open bottom, LEDs facing the tube wall.</li>
+        <li>Push until the spine's feet stop against the tube's foot flange.</li>
+      </ol>
+      <div class="note"><b>Tight fit?</b> The tube is one thin wall; flex it gently rather than forcing. A dab of hot glue at the foot keeps the spine from sliding out.</div>
+    </div>
+    <img class="render" src="render/beam.png" alt="Spine with strip inside the ghosted tube, socket below">
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>3</span></div>
+</section>
+
+<!-- ============================ STEPS 3-4 ============================ -->
+<section class="page">
+  <div class="eyebrow">Assembly</div>
+  <h2>The arena</h2>
+  <div class="step">
+    <div>
+      <div class="num">3</div>
+      <h3>Mount the socket and the beam</h3>
+      <ol>
+        <li>Find the centre of the arena base <b>A</b> floor. Glue socket <b>G</b> there, slot facing the arena's wire hole at the back.</li>
+        <li>Pass the three strip leads through the socket's slot and out the arena's wire hole.</li>
+        <li>Drop the tube's foot into the socket. It should stand straight; if it leans, the glue hasn't set.</li>
+      </ol>
+      <div class="warn"><b>Wait for the glue.</b> The tube is 250 mm tall; a socket that shifts while curing gives a permanently leaning beam.</div>
+    </div>
+    <img class="render" src="render/lid.png" alt="Tube standing in the socket, lid held above">
+  </div>
+  <div class="step">
+    <div>
+      <div class="num">4</div>
+      <h3>Fit the lid</h3>
+      <ol>
+        <li>Lower lid <b>B</b> over the tube; the 12.4 mm hole should clear the tube with a hair of play.</li>
+        <li>Seat the lid on the arena rim. It lifts off again any time you need to reach inside.</li>
+      </ol>
+      <div class="note"><b>Cut your own hole?</b> If you printed the no-hole lid, add a 12.4 mm negative cylinder in Bambu Studio, centred, before slicing.</div>
+    </div>
+    <img class="render" src="render/plinth_top.png" alt="Arena being lowered onto the plinth">
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>4</span></div>
+</section>
+
+<!-- ============================ STEPS 5-6 ============================ -->
+<section class="page">
+  <div class="eyebrow">Assembly</div>
+  <h2>The plinth and the wiring</h2>
+  <div class="step">
+    <div>
+      <div class="num">5</div>
+      <h3>Seat the display board</h3>
+      <ol>
+        <li>Turn plinth <b>C</b> upside down. Behind the front window is a tilted pocket.</li>
+        <li>Slide board <b>H</b> into the pocket, <b>screen facing the window</b>, USB connector toward the bottom edge.</li>
+        <li>Push until the glass rests against the window lip. From the front, the picture area should be centred in the window.</li>
+      </ol>
+      <div class="note"><b>Off-centre?</b> The window position is a parameter in the plinth model (<code>screen_ofs_x</code>). Adjust and reprint the test slice rather than the whole plinth.</div>
+    </div>
+    <img class="render" src="render/cutaway.png" alt="Cutaway of the plinth showing the board behind the window">
+  </div>
+  <div class="step">
+    <div>
+      <div class="num">6</div>
+      <h3>Connect the strip: three lever nuts</h3>
+      <p style="font-size:10.5pt">Each connector <b>J</b> joins one board lead to one strip lead. Lift the orange lever, push the stripped wire in to the stop, close the lever. Fold the board's thin pigtail wire double so it grips.</p>
+      <table>
+        <tr><th>Board (P1 / CN1 pigtails)</th><th>Strip lead</th><th>Carries</th></tr>
+        <tr><td><span class="wire" style="background:#d0342c"></span>VIN</td><td><span class="wire" style="background:#d0342c"></span>Red</td><td>5 V power</td></tr>
+        <tr><td><span class="wire" style="background:#202020"></span>GND</td><td><span class="wire" style="background:#e8e8e8"></span>White (or black)</td><td>Ground</td></tr>
+        <tr><td><span class="wire" style="background:#2f9e44"></span>IO22</td><td><span class="wire" style="background:#2f9e44"></span>Green</td><td>Data</td></tr>
+      </table>
+      <div class="warn"><b>Check before power.</b> Red to VIN, green to IO22. Swapping 5 V and data can damage the first LED.</div>
+    </div>
+    <img class="render" src="render/wiring.png" alt="Board, three lever nuts and the strip end wired together">
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>5</span></div>
+</section>
+
+<!-- ============================ STEPS 7-8 ============================ -->
+<section class="page">
+  <div class="eyebrow">Assembly</div>
+  <h2>Close it up and power on</h2>
+  <div class="step">
+    <div>
+      <div class="num">7</div>
+      <h3>Route the cable, close the plinth</h3>
+      <ol>
+        <li>Tuck the three connectors into the plinth. Route the board's USB cable out the slot at the back (or plug it into the panel jack if you fitted one).</li>
+        <li>Press bottom lid <b>D</b> into the plinth. The bump on the lid presses the board up against the window.</li>
+        <li>Set the arena onto the plinth; it drops into the shallow recess. Feed the strip leads down the wire hole first.</li>
+      </ol>
+    </div>
+    <img class="render" src="render/exploded.png" alt="Exploded view of the full stack" style="max-height:3.2in;object-fit:cover">
+  </div>
+  <div class="step">
+    <div>
+      <div class="num">8</div>
+      <h3>Power on and join WiFi</h3>
+      <ol>
+        <li>Plug the USB cable into adapter <b>K</b>. The screen shows the Kings logo, then <b>WIFI SETUP</b>.</li>
+        <li>On your phone, open WiFi settings and join the network <b>KingsBeam-Setup</b>.</li>
+        <li>A setup page opens by itself (if not, browse to <code>192.168.4.1</code>). Choose your home WiFi, enter its password, tap Save.</li>
+        <li>Within a few seconds the screen changes to <b>NEXT GAME</b>. The board remembers your WiFi from now on.</li>
+      </ol>
+      <div class="note"><b>Test the beam now.</b> Tap the screen once: the beam should rise purple from the bottom. Tap again to turn it off.</div>
+    </div>
+    <img class="render" src="render/screen.png" alt="The finished plinth with the screen lit">
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>6</span></div>
+</section>
+
+<!-- ============================ USING IT ============================ -->
+<section class="page">
+  <div class="eyebrow">Day to day</div>
+  <h2>Using it</h2>
+  <div class="two">
+    <div>
+      <h3>What the screen shows</h3>
+      <div class="kv">
+        <div><span>Next game</span><span>Opponent, home or away, tipoff time, countdown. Updates every 10 minutes; every 30 seconds in the last 20 minutes before tipoff.</span></div>
+        <div><span>Live</span><span>Score, quarter and clock, refreshed every 20 seconds. The beam pulses softly.</span></div>
+        <div><span>Final</span><span>Kings win: the beam rises and holds, and the screen says so. Loss: the score and "next time".</span></div>
+        <div><span>Offline</span><span>A small badge in the corner. The last good screen stays up; it retries every minute.</span></div>
+      </div>
+      <h3 style="margin-top:16pt">Touch</h3>
+      <div class="kv">
+        <div><span>Tap</span><span>Beam on / off. Works in any state.</span></div>
+        <div><span>Hold 1 s</span><span>Cycle beam brightness: low, medium, full.</span></div>
+      </div>
+    </div>
+    <div>
+      <h3>Automatic behaviour</h3>
+      <div class="kv">
+        <div><span>After a win</span><span>The beam stays lit for up to 12 hours, until you tap it off, or until the next game appears.</span></div>
+        <div><span>At night</span><span>Screen dims from 11 pm to 7 am, and whenever the room is dark.</span></div>
+        <div><span>Power loss</span><span>Reboots into the current state; WiFi is remembered.</span></div>
+      </div>
+      <h3 style="margin-top:16pt">Care</h3>
+      <p class="muted" style="font-size:10pt">Dust with a dry cloth. Keep away from windows in direct sun: PLA softens above about 55 °C. The lid lifts off to reach the beam; the bottom lid pulls off to reach the board.</p>
+      <h3 style="margin-top:16pt">Moving to another WiFi</h3>
+      <p class="muted" style="font-size:10pt">If the board can't find the saved network within 20 seconds of booting, it opens <b>KingsBeam-Setup</b> again. Join it and repeat step 8.</p>
+    </div>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>7</span></div>
+</section>
+
+<!-- ============================ TROUBLESHOOTING + PRINT ============================ -->
+<section class="page">
+  <div class="eyebrow">If something's off</div>
+  <h2>Troubleshooting</h2>
+  <table>
+    <tr><th style="width:2.4in">Symptom</th><th>Try</th></tr>
+    <tr><td>Screen dark, no logo</td><td>Use a 2 A adapter, not a laptop port. Try the other USB socket on the board if it has two.</td></tr>
+    <tr><td>Colors inverted or washed out</td><td>You have the other board variant. Rebuild the firmware with the ST7789 flags noted in <code>firmware/platformio.ini</code>.</td></tr>
+    <tr><td>Picture upside down</td><td>Change <code>LV_DISPLAY_ROTATION_90</code> to <code>_270</code> in <code>firmware/src/ui.cpp</code>, rebuild.</td></tr>
+    <tr><td>Beam never lights, even on tap</td><td>Check red → VIN and green → IO22. Confirm the strip's arrow points away from the wired end.</td></tr>
+    <tr><td>First LED flickers or wrong color</td><td>Shorten the data lead, or add the 74AHCT125 level shifter between IO22 and the strip.</td></tr>
+    <tr><td>Beam lights but dim</td><td>Hold the screen for a second to step brightness. Or you're on a weak charger.</td></tr>
+    <tr><td>"OFFLINE" badge won't clear</td><td>ESPN is unreachable. It retries every minute. If it persists for hours, reboot; if it still persists, the firmware's user agent may need updating.</td></tr>
+    <tr><td>Wrong time on the countdown</td><td>The board syncs time from the internet on boot. Give it a minute after connecting.</td></tr>
+    <tr><td>Taps not registering</td><td>Press firmly with a fingertip; the panel is resistive. Threshold is <code>Z_THRESHOLD</code> in <code>firmware/src/touch.cpp</code>.</td></tr>
+  </table>
+
+  <div class="folio"><span>Light the Beam</span><span>8</span></div>
+</section>
+
+<!-- ============================ PRINT + SPECS ============================ -->
+<section class="page">
+  <div class="eyebrow">Making the parts</div>
+  <h2>Printing the parts</h2>
+  <table>
+    <tr><th>Part</th><th>File</th><th>Filament</th><th>Settings</th><th>Time</th></tr>
+    <tr><td>A · Arena base</td><td>Printables, 220 mm base</td><td>silver PLA</td><td>0.2 mm · 3 walls · 15 % · no supports</td><td>~9 h</td></tr>
+    <tr><td>B · Arena lid</td><td>Printables, no-hole lid + 12.4 mm cut</td><td>silver PLA</td><td>0.15 mm</td><td>~2 h</td></tr>
+    <tr><td>C · Plinth</td><td><code>plinth.stl</code> (test <code>plinth_test.stl</code> first)</td><td>silver PLA</td><td>0.2 mm · upside down · 15 % gyroid</td><td>~5 h</td></tr>
+    <tr><td>D · Bottom lid</td><td><code>plinth_lid.stl</code></td><td>silver PLA</td><td>0.2 mm</td><td>~40 min</td></tr>
+    <tr><td>E · Beam tube</td><td><code>beam_tube.stl</code></td><td>white PLA</td><td>vase mode · 0.4 nozzle · 2 bottom layers</td><td>~1 h</td></tr>
+    <tr><td>F · Spine, G · Socket</td><td><code>beam_spine.stl</code>, <code>beam_socket.stl</code></td><td>white PLA</td><td>0.2 mm</td><td>~20 min</td></tr>
+  </table>
+
+  <div class="two" style="margin-top:24pt">
+    <div>
+      <h3>Specifications</h3>
+      <div class="kv">
+        <div><span>Footprint</span><span>230 mm diameter</span></div>
+        <div><span>Height</span><span>≈ 385 mm to the beam tip</span></div>
+        <div><span>Power</span><span>5 V USB, 1 A peak</span></div>
+        <div><span>Network</span><span>2.4 GHz WiFi</span></div>
+        <div><span>Data</span><span>ESPN public scores, no account</span></div>
+      </div>
+    </div>
+    <div>
+      <h3>Safety</h3>
+      <p class="muted" style="font-size:10pt">Low-voltage USB only. Don't power from anything but a 5 V adapter. Indoor use. The beam tube is thin-walled: don't let small children swing it. Unplug before opening the plinth.</p>
+    </div>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>9</span></div>
+</section>
+</body>
+</html>

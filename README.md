@@ -33,7 +33,7 @@ app-controlled light bar, and the arena sits on a new printed plinth that holds 
 | `firmware/` | PlatformIO project for the ESP32-2432S028R board (LVGL UI, FastLED beam) |
 | `models/` | OpenSCAD sources for the plinth, beam tube and strip spine; `printables/` is where the downloaded arena STLs go |
 | `tools/` | `espn_probe.py` (check the API), `make_fixtures.py` (test data), `make_logos.py` (team logos → C header) |
-| `docs/` | Bill of materials with links and the overview PDF |
+| `docs/` | Bill of materials, the overview PDF, the assembly guide PDF, and `render/` (three.js scene + rendered views) |
 
 ## Quick start
 
@@ -53,7 +53,8 @@ app-controlled light bar, and the arena sits on a new printed plinth that holds 
 4. **Wire** the strip to the board with three WAGO 221-413 lever nuts (diagram in
    `docs/bom.md`). Board VIN → strip 5V, GND → GND, GPIO 22 → DIN.
 
-Overview document: [`docs/kings-beam-overview.pdf`](docs/kings-beam-overview.pdf).
+Documents: [`docs/kings-beam-overview.pdf`](docs/kings-beam-overview.pdf) (what it is) and
+[`docs/kings-beam-assembly.pdf`](docs/kings-beam-assembly.pdf) (step-by-step build guide).
 
 ## Developing
 
@@ -64,6 +65,14 @@ python3 ../tools/espn_probe.py     # what the board will see right now
 python3 ../tools/make_fixtures.py  # refresh live/post fixtures from last season's games
 python3 ../tools/make_fonts.py     # regenerate LVGL fonts from tools/fonts/*.ttf (needs Pillow)
 python3 ../tools/make_logos.py     # regenerate team logos + colors from ESPN
+../tools/render_views.sh           # re-render docs/render/*.png from the three.js scene (headless Chrome)
+```
+
+The PDFs are printed from `docs/overview.html` and `docs/assembly.html` with headless Chrome:
+
+```
+cd docs && "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
+  --no-pdf-header-footer --virtual-time-budget=10000 --print-to-pdf="$PWD/kings-beam-assembly.pdf" "file://$PWD/assembly.html"
 ```
 
 Board notes: the ESP32-2432S028R comes in two variants. If colors look inverted, switch the
