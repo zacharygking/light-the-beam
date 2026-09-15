@@ -10,12 +10,12 @@ live check at checkout; Adafruit and Bambu prices were read from their sites on 
 |---|---|---|---|---|
 | 1 | ESP32 + 2.8" touch display | AITRIP 1-pack **ESP32-2432S028R** ("Cheap Yellow Display"). Ships with USB cable, JST pigtails, Dupont wires | ~$14 verify | [Amazon B0FCXDVBVZ](https://www.amazon.com/dp/B0FCXDVBVZ) |
 | 2 | LED strip | BTF-LIGHTING **WS2812B 5 V, 60 LEDs/m, 1 m, IP30**, black PCB (white PCB: B01CDTE9UC). Bare 22 AWG leads on the ends | ~$9 verify | [Amazon B01CDTED80](https://www.amazon.com/dp/B01CDTED80) |
-| 3 | 5 V / 2 A USB wall adapter | Any UL-listed 5 V 2 A+ USB-A charger. The board's included cable is USB-A → micro-USB | ~$7 verify | [Amazon search](https://www.amazon.com/s?k=5v+2a+usb+wall+charger+ul+listed) or Best Buy Insignia 12 W ([SKU 6406429](https://www.bestbuy.com/site/6406429.p), ~$13) |
-| 4 | Solder-free connectors | **WAGO 221-413** lever nuts (3-conductor, 24–12 AWG), pack of 10. Need 3 | ~$8 verify | [Amazon search](https://www.amazon.com/s?k=wago+221-413), Lowe's Bayshore, or [Home Depot 318072979](https://www.homedepot.com/p/318072979) |
+| 3 | 5 V / 2 A USB wall adapter | Amazon Basics 12 W one-port USB-A (2.4 A). Any 5 V 2 A+ charger works; the board's included cable is USB-A → micro-USB | ~$7 verify | [Amazon B0773J79KC](https://www.amazon.com/dp/B0773J79KC) or Best Buy Insignia 12 W ([SKU 6406429](https://www.bestbuy.com/site/6406429.p), ~$13) |
+| 4 | Solder-free connectors | **WAGO 221-413** lever nuts (3-conductor, 24–12 AWG), pack of 10. Need 3 | ~$8 verify | [Amazon B06XGYXVXR](https://www.amazon.com/dp/B06XGYXVXR), Lowe's Bayshore (~$10), or [Home Depot 318072979](https://www.homedepot.com/p/318072979) |
 
 | Scenario | Subtotal | Tax | Total |
 |---|---|---|---|
-| Items 1–4, all Amazon Prime | $38 | $3.30 | **≈ $41** |
+| Items 1–4, all Amazon Prime ([one-click cart](shopping-list.html)) | $38 | $3.30 | **≈ $41** |
 | Amazon board + strip, WAGO from Lowe's, charger from Best Buy | $46 | $4.00 | **≈ $50** |
 | eBay board ($13.99) + AliExpress strip (~$4), 2–3 week wait | $33 | $2.85 | **≈ $36** |
 
@@ -28,15 +28,16 @@ live check at checkout; Adafruit and Bambu prices were read from their sites on 
 | Level shifter, only if the first LED flickers | Adafruit 74AHCT125 | $1.50 | [Adafruit 1787](https://www.adafruit.com/product/1787) |
 | 2-pack of the display board (spare for another project) | ESP32-2432S028R 2-pack | ~$20 verify | [Amazon B0GX5X7BH6](https://www.amazon.com/dp/B0GX5X7BH6) |
 
-Not needed: resistor on the data line (a 25 cm lead works without it), hookup wire (the
-board's pigtails reach the strip leads), soldering iron.
+Not needed: hookup wire (the board's pigtails reach the strip leads), soldering iron. A series
+resistor on the data line is expected to be unnecessary with a 25 cm lead; add 300–500 Ω if LED 1
+misbehaves (untested on hardware yet).
 
 ## Filament (separate; Bambu Lab P1S)
 
 | Part | Exact item | Price | Where |
 |---|---|---|---|
-| Silver PLA, 1 kg — arena base + lid + plinth (~450 g) | Bambu PLA Basic Silver, with spool $18.99 / refill $15.99 | $16–19 | [Bambu US store](https://us.store.bambulab.com/products/pla-basic-filament) |
-| White PLA — beam tube (~20 g, single-wall vase print) | Bambu PLA Basic White refill, or ELEGOO / SUNLU white, or Bambu Jade White at Best Buy today ($22.99) | $13–23 | [Amazon search](https://www.amazon.com/s?k=white+pla+filament+1kg) |
+| Silver PLA, 1 kg — arena base + lid + plinth ring, top plate, bottom lid (~480 g) | Bambu PLA Basic Silver, with spool $18.99 / refill $15.99 | $16–19 | [Bambu US store](https://us.store.bambulab.com/products/pla-basic-filament) |
+| White PLA — beam tube, spine and socket (~35 g; the tube is a single-wall vase print) | Bambu PLA Basic White refill, or ELEGOO / SUNLU white, or Bambu Jade White at Best Buy today ($22.99) | $13–23 | [Amazon search](https://www.amazon.com/s?k=white+pla+filament+1kg) |
 | alt: one spool only | Print everything in white and skip the silver | $13–19 | — |
 | optional accent | Bambu PLA Basic Purple for the plinth | $18.99 | Bambu store |
 
@@ -66,6 +67,7 @@ CYD header P1  (VIN, TX, RX, GND)      CYD connector CN1 (GND, IO22, IO27, 3V3)
 
 - Use the JST pigtails that come with the board. Fold the thin pigtail wire back on itself so
   the WAGO clamps it; the strip's 22 AWG lead goes in the other port.
-- 15 LEDs at the firmware's brightness cap ≈ 450 mA + board ≈ 200 mA: fine on a 2 A charger.
+- 14 LEDs at the default brightness ≈ 0.45 A plus the board ≈ 0.2 A. The firmware caps the strip at
+  0.9 A, so 1.1 A worst case: fine on a 2 A charger.
 - 3.3 V data into a 5 V strip works with a short lead. If the first LED flickers, add the
   level shifter above.

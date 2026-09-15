@@ -1,13 +1,7 @@
 // The beam: a short WS2812B strip inside the diffuser tube.
 #pragma once
 #include <stdint.h>
-
-enum class BeamMode : uint8_t {
-  Off,        // dark
-  Pulse,      // slow dim purple breathing (during a live game)
-  Rise,       // the win animation: purple climbs from the base, then holds
-  Hold,       // solid purple
-};
+#include "beam_policy.h"   // BeamMode
 
 void beam_init();
 void beam_set_mode(BeamMode m);

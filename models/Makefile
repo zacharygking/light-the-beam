@@ -4,7 +4,7 @@
 OPENSCAD ?= $(shell command -v openscad 2>/dev/null || echo /Applications/OpenSCAD.app/Contents/MacOS/OpenSCAD)
 OUT = exports
 
-TARGETS = $(OUT)/plinth.stl $(OUT)/plinth_lid.stl $(OUT)/plinth_test.stl \
+TARGETS = $(OUT)/plinth.stl $(OUT)/plinth_top.stl $(OUT)/plinth_lid.stl $(OUT)/plinth_test.stl \
           $(OUT)/beam_tube.stl $(OUT)/beam_spine.stl $(OUT)/beam_socket.stl
 
 all: $(TARGETS)
@@ -12,11 +12,13 @@ all: $(TARGETS)
 $(OUT):
 	mkdir -p $(OUT)
 
-$(OUT)/plinth.stl: plinth.scad | $(OUT)
-	$(OPENSCAD) -o $@ -D 'part="body"' $<
-$(OUT)/plinth_lid.stl: plinth.scad | $(OUT)
+$(OUT)/plinth.stl: plinth.scad arena_outline.scad | $(OUT)
+	$(OPENSCAD) -o $@ -D 'part="ring"' $<
+$(OUT)/plinth_top.stl: plinth.scad arena_outline.scad | $(OUT)
+	$(OPENSCAD) -o $@ -D 'part="plate"' $<
+$(OUT)/plinth_lid.stl: plinth.scad arena_outline.scad | $(OUT)
 	$(OPENSCAD) -o $@ -D 'part="lid"' $<
-$(OUT)/plinth_test.stl: plinth.scad | $(OUT)
+$(OUT)/plinth_test.stl: plinth.scad arena_outline.scad | $(OUT)
 	$(OPENSCAD) -o $@ -D 'part="test"' $<
 $(OUT)/beam_tube.stl: beam_tube.scad | $(OUT)
 	$(OPENSCAD) -o $@ $<

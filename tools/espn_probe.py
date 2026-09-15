@@ -90,7 +90,7 @@ def main():
     args = ap.parse_args()
 
     doc = fetch(args.team)
-    parsed = parse(doc, args.team)
+    parsed = parse(doc, doc["team"]["abbreviation"])   # the URL slug can differ from the abbreviation (gsw vs GS)
     print(json.dumps(parsed, indent=2))
     print()
     print(describe(parsed))

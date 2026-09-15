@@ -6,6 +6,7 @@
 static CRGB leds[BEAM_NUM_LEDS];
 static BeamMode mode = BeamMode::Off;
 static uint32_t modeStart = 0;
+static bool dirty = true;   // push to the strip on the next tick
 static const uint8_t levels[] = {BEAM_MAX_BRIGHTNESS / 3, (BEAM_MAX_BRIGHTNESS * 2) / 3, BEAM_MAX_BRIGHTNESS};
 static uint8_t levelIdx = 2;
 
@@ -25,6 +26,7 @@ void beam_set_mode(BeamMode m) {
   if (m == mode) return;
   mode = m;
   modeStart = millis();
+  dirty = true;
   log_i("beam -> %d", (int)m);
 }
 
@@ -38,6 +40,7 @@ void beam_toggle() {
 void beam_cycle_brightness() {
   levelIdx = (levelIdx + 1) % 3;
   FastLED.setBrightness(levels[levelIdx]);
+  dirty = true;
 }
 
 // The real beam at Golden 1 Center rises from the roof: we light LED 0 (bottom) first and
@@ -68,9 +71,14 @@ void beam_tick() {
   lastShow = now;
   uint32_t t = now - modeStart;
 
+  // Off is static: write it once, then leave the RMT channel alone (less ISR load next to WiFi)
+  if (mode == BeamMode::Off) {
+    if (dirty) { fill_solid(leds, BEAM_NUM_LEDS, CRGB::Black); FastLED.show(); dirty = false; }
+    return;
+  }
+  dirty = false;
   switch (mode) {
     case BeamMode::Off:
-      fill_solid(leds, BEAM_NUM_LEDS, CRGB::Black);
       break;
     case BeamMode::Pulse: {
       uint8_t b = beatsin8(6, 8, 60);   // 6 bpm, dim

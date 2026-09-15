@@ -24,7 +24,7 @@
 
 // ---- Beam (WS2812B strip) ----------------------------------------------------
 #define BEAM_PIN             22      // CYD connector CN1: GND, IO22, IO27, 3V3
-#define BEAM_NUM_LEDS        15
+#define BEAM_NUM_LEDS        14      // 14 x 16.67 mm = 233 mm of strip inside the 250 mm tube
 #define BEAM_MAX_BRIGHTNESS  128     // 0-255; caps current so a 2 A USB charger is plenty
 #define BEAM_HOLD_HOURS      12      // stay lit this long after a win (or until tapped off)
 #define BEAM_PURPLE          0x5A2D81

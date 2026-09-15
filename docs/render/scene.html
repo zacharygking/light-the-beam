@@ -70,40 +70,49 @@ function mesh(geo, mat, opts = {}) {
 }
 
 // ---- parts -------------------------------------------------------------------
+// Plinth: follows the measured arena outline offset by 10 mm (approximated here by scaling
+// the outline about its centre), 56 mm tall, with the sloped console on the front (-Z).
+let ARENA_PTS = null;   // [[x, y], ...] in the measured frame (flat edge at +x), filled by loadReal()
+function plinthShape(grow = 1.0) {
+  const sh = new THREE.Shape();
+  const pts = ARENA_PTS || OUTLINE.map(p => [p[0], -p[1]]);
+  // rotate(90): (x, y) -> (-y, x) so the flat edge faces the back; scene z = -y of that
+  pts.forEach((p, i) => { const x = -p[1] * grow, z = -(p[0] * grow); i ? sh.lineTo(x, z) : sh.moveTo(x, z); });
+  sh.closePath();
+  return sh;
+}
 function makePlinth({ cutaway = false } = {}) {
   const g = new THREE.Group();
-  const r = 115, h = 56;
-  const wall = cutaway
-    ? new THREE.CylinderGeometry(r, r, h, 128, 1, true, THREE.MathUtils.degToRad(100), THREE.MathUtils.degToRad(250))
-    : new THREE.CylinderGeometry(r, r, h, 128, 1, false);
-  const wm = M.silver.clone(); wm.side = THREE.DoubleSide;
-  const w = mesh(wall, wm); w.position.y = h / 2; g.add(w);
+  const h = 56, grow = 1 + 10 / 103;
+  const wallGeo = new THREE.ExtrudeGeometry(plinthShape(grow), { depth: h, bevelEnabled: false, curveSegments: 1 });
+  wallGeo.rotateX(-Math.PI / 2);   // extrude along +y; shape y -> -z (front at +z)
+  const body = mesh(wallGeo, ds(M.silver));
   if (cutaway) {
-    // inner skin so the cut edge reads as a 3 mm wall, and the top plate
-    const inner = mesh(new THREE.CylinderGeometry(r - 3, r - 3, h - 3, 128, 1, true, THREE.MathUtils.degToRad(100), THREE.MathUtils.degToRad(250)), wm);
-    inner.position.y = (h - 3) / 2; g.add(inner);
-    const top = mesh(new THREE.CylinderGeometry(r, r, 3, 128), M.silver); top.position.y = h - 1.5; g.add(top);
+    // show the inside: drop the right half of the walls
+    const clip = new THREE.Mesh(new THREE.BoxGeometry(400, 400, 400), M.silver); // unused placeholder
   }
-  // recess ring on top (where the arena sits)
-  const ring = mesh(new THREE.TorusGeometry(110.5, 1.2, 8, 128), M.silverDark, { cast: false });
-  ring.rotation.x = Math.PI / 2; ring.position.y = h + 0.2; g.add(ring);
-  // sloped console on the front: face leans back 20 deg, bottom edge ~18 mm in front of the drum
+  g.add(body);
+  // top plate recess ring
+  const rim = new THREE.ExtrudeGeometry(plinthShape(1.005), { depth: 0.6, bevelEnabled: false, curveSegments: 1 });
+  rim.rotateX(-Math.PI / 2); const rimM = mesh(rim, M.silverDark, { cast: false }); rimM.position.y = h; g.add(rimM);
+  // sloped console on the front (+z in scene = -y in the model)
+  const frontZ = 103 * grow;                         // prow of the plinth outline
   const tilt = THREE.MathUtils.degToRad(20), out = h * Math.tan(tilt);
-  const sh = new THREE.Shape();   // (u = outward from drum face, v = up), stored as (-u, v) for rotateY(90)
-  sh.moveTo(20, 0); sh.lineTo(-out, 0); sh.lineTo(0, h); sh.lineTo(20, h); sh.closePath();
-  const wg = new THREE.ExtrudeGeometry(sh, { depth: 96, bevelEnabled: false });
-  wg.rotateY(Math.PI / 2); wg.translate(-48, 0, r);
-  const wedge = mesh(wg, ds(M.silver)); g.add(wedge);
+  const sh = new THREE.Shape();   // (u = outward from the prow, v = up), stored as (-u, v) for rotateY(90)
+  sh.moveTo(24, 0); sh.lineTo(-out, 0); sh.lineTo(0, h); sh.lineTo(24, h); sh.closePath();
+  const wg = new THREE.ExtrudeGeometry(sh, { depth: 108, bevelEnabled: false });
+  wg.rotateY(Math.PI / 2); wg.translate(-54, 0, frontZ);
+  g.add(mesh(wg, ds(M.silver)));
   const win = new THREE.Group();
-  win.position.set(0, h / 2, r + out / 2); win.rotation.x = -tilt;
-  const bezel = mesh(new THREE.BoxGeometry(62, 46, 4), M.black); bezel.position.z = 1; win.add(bezel);
+  win.position.set(8 + 7 - 8, h / 2, frontZ + out / 2); win.rotation.x = -tilt;   // board centre + screen offset, minus half the plug room
+  const bezel = mesh(new THREE.BoxGeometry(62, 47, 4), M.black); bezel.position.z = 1; win.add(bezel);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial()); screen.position.z = 3.05; win.add(screen);
   g.add(win);
-  // cable out the back
   // USB cable: leaves the back slot low, droops to the table, and trails away in a lazy curve
-  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 6, -112), new THREE.Vector3(0, 3, -128), new THREE.Vector3(-14, 2.2, -150), new THREE.Vector3(-40, 2.2, -175), new THREE.Vector3(-90, 2.2, -190), new THREE.Vector3(-170, 2.2, -180)]);
-  const cable = mesh(new THREE.TubeGeometry(path, 64, 2.2, 12), M.black); g.add(cable);
-  const plug = mesh(new THREE.BoxGeometry(6, 5, 10), M.black); plug.position.set(0, 6, -116); g.add(plug);
+  const backZ = -103 * grow;
+  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 6, backZ), new THREE.Vector3(0, 3, backZ - 16), new THREE.Vector3(-14, 2.2, backZ - 38), new THREE.Vector3(-40, 2.2, backZ - 63), new THREE.Vector3(-90, 2.2, backZ - 78), new THREE.Vector3(-170, 2.2, backZ - 68)]);
+  g.add(mesh(new THREE.TubeGeometry(path, 64, 2.2, 12), M.black));
+  const plug = mesh(new THREE.BoxGeometry(6, 5, 10), M.black); plug.position.set(0, 6, backZ - 4); g.add(plug);
   return g;
 }
 
@@ -220,10 +229,10 @@ function makeSocket() {
 
 function makeSpine({ withStrip = true } = {}) {
   const g = new THREE.Group();
-  const bar = mesh(new THREE.BoxGeometry(10, 262, 1.6), M.white); bar.position.y = 131; g.add(bar);
+  const bar = mesh(new THREE.BoxGeometry(10, 245, 1.6), M.white); bar.position.y = 122.5; g.add(bar);
   if (withStrip) {
-    const strip = mesh(new THREE.BoxGeometry(10, 250, 0.8), M.strip); strip.position.set(0, 133, 1.2); g.add(strip);
-    for (let i = 0; i < 15; i++) {
+    const strip = mesh(new THREE.BoxGeometry(10, 233, 0.8), M.strip); strip.position.set(0, 124, 1.2); g.add(strip);
+    for (let i = 0; i < 14; i++) {
       const led = mesh(new THREE.BoxGeometry(5, 5, 1.2), M.led, { cast: false });
       led.position.set(0, 14 + i * 16.67, 1.9); g.add(led);
     }
@@ -337,6 +346,9 @@ async function loadReal() {
   try {
     const [b, l] = await Promise.all([loadStl('../../models/printables/base_220.stl'), loadStl('../../models/printables/lid_220_nohole.stl')]);
     REAL.base = b; REAL.lid = l;
+    const scad = await (await fetch('../../models/arena_outline.scad')).text();
+    const m = scad.match(/arena_outline = \[([\s\S]*?)\];/);
+    if (m) ARENA_PTS = [...m[1].matchAll(/\[\s*(-?[\d.]+),\s*(-?[\d.]+)\s*\]/g)].map(x => [parseFloat(x[1]), parseFloat(x[2])]);
     // the lid file has its own origin; centre it on its bbox and drop it onto the inner box (49.5 mm)
     l.computeBoundingBox(); const c = l.boundingBox.getCenter(new THREE.Vector3());
     l.translate(-c.x, -c.y, -l.boundingBox.min.z);
@@ -369,7 +381,7 @@ function look(px, py, pz, tx, ty, tz, fov = 30) { camera.fov = fov; camera.posit
 
 await loadReal();
 const real = !!REAL.base;
-const ARENA_Y = 56, ROOF_Y = ARENA_Y + (real ? 44.5 : 60), TUBE_Y = ARENA_Y + 2 + 8;   // tube foot sits in the socket on the arena floor
+const ARENA_Y = 56 - 1.2, ROOF_Y = ARENA_Y + (real ? 44.5 : 60), TUBE_Y = ARENA_Y + 2 + 8;   // tube foot sits in the socket on the arena floor
 const arenaBase = () => real ? realBase(0) : makeArenaBase();
 const arenaRoof = () => real ? realLid(0) : makeRoof();
 
@@ -407,8 +419,8 @@ if (VIEW === 'beam') {
 
 if (VIEW === 'strip') {
   // strip cut to 15 LEDs, spine beside it, before sticking
-  const strip = mesh(new THREE.BoxGeometry(250, 0.8, 10), M.strip); strip.position.set(0, 0.4, 20); scene.add(strip);
-  for (let i = 0; i < 15; i++) { const led = mesh(new THREE.BoxGeometry(5, 1.2, 5), M.led, { cast: false }); led.position.set(-117 + i * 16.67, 1.3, 20); scene.add(led); }
+  const strip = mesh(new THREE.BoxGeometry(233, 0.8, 10), M.strip); strip.position.set(0, 0.4, 20); scene.add(strip);
+  for (let i = 0; i < 14; i++) { const led = mesh(new THREE.BoxGeometry(5, 1.2, 5), M.led, { cast: false }); led.position.set(-117 + i * 16.67, 1.3, 20); scene.add(led); }
   const spine = makeSpine({ withStrip: false }); spine.rotation.z = -Math.PI / 2; spine.position.set(-131, 0.8, -12); scene.add(spine);
   scene.add(wire([[-126, 0.6, 20], [-150, 0.6, 22], [-175, 0.6, 18]], M.wireRed));
   scene.add(wire([[-126, 0.6, 18], [-150, 0.6, 17], [-175, 0.6, 12]], M.wireGreen));
@@ -417,8 +429,8 @@ if (VIEW === 'strip') {
 }
 
 if (VIEW === 'cutaway') {
-  const plinth = makePlinth({ cutaway: true }); scene.add(plinth);
-  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.position.set(0, 28, 118); scene.add(board);
+  const plinth = makePlinth(); scene.add(plinth);
+  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.position.set(8, 28, 119); scene.add(board);
   for (let i = 0; i < 3; i++) { const w = makeWago(); w.position.set(-40 + i * 22, 4.5, -60); scene.add(w); }
   scene.add(wire([[-30, 8, -62], [-20, 20, -20], [-10, 30, 40], [-5, 34, 88]], M.wireRed));
   scene.add(wire([[-8, 8, -62], [0, 22, -20], [5, 32, 40], [8, 36, 88]], M.wireWhite));

@@ -10,10 +10,10 @@ part = "spine";
 
 tube_id   = 12 - 2 * 0.45;   // inner diameter of the vase-mode tube (one 0.45 mm wall)
 strip_w   = 10;              // WS2812B 60/m strip is 10 mm wide
-led_count = 15;
+led_count = 14;              // 14 x 16.67 = 233 mm of strip; 15 would not fit inside the 250 mm tube
 led_pitch = 16.67;           // 60 LEDs per metre
 spine_t   = 1.6;
-spine_h   = led_count * led_pitch + 12;
+spine_h   = 245;             // must be shorter than the tube interior (250 - foot 3 - tip): strip is 233 + wire notch
 
 foot_d    = 16;
 socket_d  = 30;
@@ -27,8 +27,8 @@ module spine() {
         union() {
             // bar
             translate([-w / 2, -spine_t / 2, 0]) cube([w, spine_t, spine_h]);
-            // little feet that stop against the tube foot
-            translate([-w / 2, -spine_t / 2 - 1.5, 0]) cube([w, spine_t + 3, 4]);
+            // feet: 13 mm wide, wider than the 11 mm bore, so they seat in the tube's 16->12 mm cone
+            translate([-13 / 2, -spine_t / 2 - 1.5, 0]) cube([13, spine_t + 3, 4]);
         }
         // wire notch at the bottom
         translate([-2, -3, -0.01]) cube([4, 6, 6]);

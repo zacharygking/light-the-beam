@@ -288,9 +288,6 @@ static void build_final(const GameState& gs, bool beamLit) {
     lv_obj_t* f = eyebrow(scr, beamLit ? "BEAM IS LIT \xC2\xB7 TAP TO TURN OFF" : "TAP TO LIGHT THE BEAM", C_MUTED);
     lv_obj_align(f, LV_ALIGN_BOTTOM_MID, 0, -14);
   } else {
-    char d[48];
-    snprintf(d, sizeof d, "%s", gs.detail[0] ? gs.detail : "FINAL");
-    upper(d);
     lv_obj_t* w = label(scr, "NEXT TIME", &barlow_cond_bold_40, C_MUTED);
     lv_obj_set_style_text_letter_space(w, 3, 0);
     lv_obj_align(w, LV_ALIGN_TOP_MID, 0, 150);
@@ -300,12 +297,12 @@ static void build_final(const GameState& gs, bool beamLit) {
   add_offline_badge(scr, false);
 }
 
-static void build_none() {
+static void build_none(const char* title) {
   lv_obj_t* scr = fresh_screen();
   lv_obj_t* e = eyebrow(scr, "SACRAMENTO KINGS", C_LAVENDER);
   lv_obj_set_pos(e, 16, 18);
   logo_badge(scr, TEAM_ABBR, SCREEN_W / 2, 100);
-  lv_obj_t* w = label(scr, "NO GAME SCHEDULED", &barlow_cond_bold_22, C_WHITE);
+  lv_obj_t* w = label(scr, title, &barlow_cond_bold_22, C_WHITE);
   lv_obj_align(w, LV_ALIGN_TOP_MID, 0, 160);
   lv_obj_t* f = eyebrow(scr, "TAP TO LIGHT THE BEAM", C_MUTED);
   lv_obj_align(f, LV_ALIGN_BOTTOM_MID, 0, -14);
@@ -316,7 +313,7 @@ static void build_none() {
 void ui_init() {
   lv_init();
   lv_tick_set_cb(tick_cb);
-  static uint8_t drawBuf[SCREEN_W * 40 * 2];   // 40-line partial buffer, 25.6 KB
+  alignas(4) static uint8_t drawBuf[SCREEN_W * 40 * 2];   // 40-line partial buffer, 25.6 KB; LVGL asserts 4-byte alignment
   // The panel is 240x320 portrait; rotate to landscape. Use ROTATION_270 if yours is upside down.
   disp = lv_tft_espi_create(240, 320, drawBuf, sizeof drawBuf);
   lv_display_set_rotation(disp, LV_DISPLAY_ROTATION_90);
@@ -328,6 +325,8 @@ void ui_init() {
 }
 
 void ui_set_backlight(uint8_t level) { ledcWrite(0, level); }
+
+void ui_flush() { lv_refr_now(NULL); }
 
 void ui_show_boot(const char* msg) {
   lv_obj_t* scr = fresh_screen();
@@ -371,7 +370,15 @@ void ui_show_game(const GameState& gs, bool beamLit) {
       case GameStatus::Pre:  build_pre(gs, time(nullptr)); break;
       case GameStatus::Live: build_live(gs); break;
       case GameStatus::Post: build_final(gs, beamLit); break;
-      default:               build_none(); break;
+      case GameStatus::Postponed: {
+        // ESPN: state "post" but not completed, shortDetail like "Postponed"
+        char t[48];
+        snprintf(t, sizeof t, "%s %s", gs.them.abbr, gs.detail[0] ? gs.detail : "POSTPONED");
+        upper(t);
+        build_none(t);
+        break;
+      }
+      default:               build_none("NO GAME SCHEDULED"); break;
     }
   }
   shown = gs;

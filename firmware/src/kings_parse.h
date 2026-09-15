@@ -1,12 +1,13 @@
 // Parse ESPN's team endpoint (GET .../teams/sac) into a GameState.
 //
 // The response is ~20-25 KB, mostly logo URLs. We hand ArduinoJson a filter document so only
-// the dozen fields we need are kept, which keeps the parsed document under ~2 KB and lets
-// the whole thing stream straight off the TLS socket without a body buffer.
+// the dozen fields we need are kept, which keeps the parsed document under ~1 KB (the body
+// itself is buffered by HTTPClient::getString in kings_api.cpp).
 #pragma once
 #include <ArduinoJson.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include "game_state.h"
 
@@ -49,7 +50,7 @@ inline JsonDocument makeFilter() {
   st["type"]["shortDetail"] = true;
   JsonObject c = comp["competitors"][0].to<JsonObject>();
   c["homeAway"] = true;
-  c["score"] = true;
+  c["score"] = true;             // string in the team endpoint; object elsewhere
   c["winner"] = true;
   c["team"]["abbreviation"] = true;
   c["team"]["shortDisplayName"] = true;
@@ -64,6 +65,10 @@ inline void fillSide(TeamSide& side, JsonObjectConst c) {
   JsonVariantConst sc = c["score"];
   if (sc.isNull()) side.score = -1;
   else if (sc.is<const char*>()) side.score = atoi(sc.as<const char*>());
+  else if (sc.is<JsonObjectConst>()) {   // core/scoreboard APIs: {"value":114.0,"displayValue":"114"}
+    JsonVariantConst v = sc["value"];
+    side.score = v.isNull() ? -1 : (int)v.as<double>();
+  }
   else side.score = sc.as<int>();
 }
 
@@ -91,7 +96,8 @@ bool parseGameState(Input& input, GameState& out, const char* ourAbbr) {
   JsonObjectConst comp = ev["competitions"][0];
   JsonObjectConst st = comp["status"];
 
-  copyStr(out.eventId, sizeof out.eventId, ev["id"] | "");
+  if (ev["id"].is<const char*>()) copyStr(out.eventId, sizeof out.eventId, ev["id"].as<const char*>());
+  else if (ev["id"].is<long long>()) snprintf(out.eventId, sizeof out.eventId, "%lld", ev["id"].as<long long>());
   copyStr(out.dateUtc, sizeof out.dateUtc, ev["date"] | "");
   out.tipoffEpoch = parseIsoUtc(out.dateUtc);
   copyStr(out.shortName, sizeof out.shortName, ev["shortName"] | "");
@@ -100,9 +106,10 @@ bool parseGameState(Input& input, GameState& out, const char* ourAbbr) {
   out.period = st["period"] | 0;
   out.completed = st["type"]["completed"] | false;
 
+  // ESPN marks postponed/cancelled games as state "post" with completed=false and no scores.
   const char* state = st["type"]["state"] | "pre";
   if (strcmp(state, "in") == 0) out.status = GameStatus::Live;
-  else if (strcmp(state, "post") == 0) out.status = GameStatus::Post;
+  else if (strcmp(state, "post") == 0) out.status = out.completed ? GameStatus::Post : GameStatus::Postponed;
   else out.status = GameStatus::Pre;
 
   bool haveUs = false, haveThem = false;

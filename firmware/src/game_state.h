@@ -3,7 +3,7 @@
 #pragma once
 #include <stdint.h>
 
-enum class GameStatus : uint8_t { None = 0, Pre, Live, Post };
+enum class GameStatus : uint8_t { None = 0, Pre, Live, Post, Postponed };
 
 struct TeamSide {
   char abbr[5]   = "";     // "SAC"

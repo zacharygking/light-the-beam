@@ -9,4 +9,5 @@ void ui_show_wifi_setup(const char* portalSsid); // captive-portal instructions
 void ui_show_game(const GameState& gs, bool beamLit);
 void ui_set_offline(bool offline);               // small badge, keeps the last screen
 void ui_tick(time_t now);                        // countdowns, blink; call every loop
+void ui_flush();                                 // render now (before a blocking call)
 void ui_set_backlight(uint8_t level);            // 0-255

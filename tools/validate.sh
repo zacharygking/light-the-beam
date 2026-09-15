@@ -39,8 +39,8 @@ import struct, sys, glob
 bad = 0
 for f in sorted(glob.glob("models/exports/*.stl")):
     d = open(f, "rb").read()
-    n = struct.unpack("<I", d[80:84])[0]
-    if n < 4 or len(d) != 84 + n * 50: print("bad STL", f); bad += 1; continue
+    n = (len(d) - 84) // 50                       # trust the file size; OpenSCAD 2021's header count can be off by one
+    if n < 4 or len(d) != 84 + n * 50: print("bad STL (not binary?)", f); bad += 1; continue
     xs, ys, zs = [], [], []
     for i in range(n):
         v = struct.unpack_from("<12f", d, 84 + i * 50)

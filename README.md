@@ -6,7 +6,7 @@ A 3D-printed Golden 1 Center that lights its purple beam when the Sacramento Kin
 
 ![The finished piece: the arena on its plinth, purple beam rising, live score on the screen](docs/render/hero.png)
 
-The arena is [Dave Lack's free Printables model](https://www.printables.com/model/338758-golden-1-center-light-the-beam), printed unmodified. Everything else is this repo: a printed plinth with a sloped console that holds a 2.8" ESP32 touch display, a 15-LED beam in a single-wall diffuser tube, firmware that reads ESPN's public scores over WiFi, and the documents to build it without soldering.
+The arena base is [Dave Lack's free Printables model](https://www.printables.com/model/338758-golden-1-center-light-the-beam), printed unmodified (the lid gets one hole). Everything else is this repo: a printed plinth with a sloped console that holds a 2.8" ESP32 touch display, a 14-LED beam in a single-wall diffuser tube, firmware that reads ESPN's public scores over WiFi, and the documents to build it without soldering.
 
 ## What it does
 
@@ -25,7 +25,7 @@ The arena is [Dave Lack's free Printables model](https://www.printables.com/mode
 
 ![Exploded view: beam tube with the strip on its spine, arena lid, arena base with the tube socket, plinth with the display board, bottom lid](docs/render/exploded.png)
 
-- **Plinth** ([`models/plinth.scad`](models/plinth.scad)): a 230 mm drum, 56 mm tall, with a console on the front whose face leans back 20° so the screen points at you at a desk. The recess on top is cut to the arena's measured footprint, so it only fits one way, and a slot sits under the arena's own wire channel. The board slides into the console from below; the bottom lid holds it.
+- **Plinth** ([`models/plinth.scad`](models/plinth.scad)): a 56 mm stand that follows the arena's measured footprint, with a console on the front whose face leans back 20° so the screen points at you at a desk. Three parts, each printable without supports: a wall ring with the console, a flat top plate whose recess is cut to the footprint (so the arena only fits one way) with a slot under the arena's own wire channel, and a bottom lid. The board slides up into the console with its USB plug attached; the lid closes the pocket.
 - **Beam** ([`models/beam_tube.scad`](models/beam_tube.scad), [`models/strip_holder.scad`](models/strip_holder.scad)): a 250 mm tube printed in vase mode from white PLA, with the WS2812B strip on a printed spine inside and a socket glued in the arena's well.
 - **Board**: ESP32-2432S028R, the "Cheap Yellow Display". Three lever-nut connections to the strip: 5 V, ground, data on GPIO 22.
 - **Firmware** ([`firmware/`](firmware/)): PlatformIO, Arduino framework. LVGL 9 UI with Barlow Condensed fonts and all 30 team logos baked in, FastLED for the beam, WiFiManager for the captive portal, ArduinoJson with a filter for the 21 KB ESPN response. A `cyd_demo` build cycles the three screens without WiFi.
@@ -69,7 +69,7 @@ Print the console test part (`plinth_test.stl`, about 40 minutes) before the ful
 |---|---|
 | `firmware/` | PlatformIO project: `src/` (UI, beam, touch, network, parser), `include/lv_conf.h`, `test/` (native Unity tests + real ESPN fixtures) |
 | `models/` | OpenSCAD sources, `exports/` STLs, `printables/` for the downloaded arena files, `arena_outline.scad` (measured footprint) |
-| `tools/` | `espn_probe.py`, `make_fixtures.py`, `make_fonts.py` (TTF → LVGL, no Node needed), `make_logos.py`, `measure_arena.py`, `render_views.sh`, `validate.sh` |
+| `tools/` | `espn_probe.py`, `make_fixtures.py`, `check_fixtures.py`, `make_fonts.py` (TTF → LVGL, no Node needed), `make_logos.py`, `measure_arena.py`, `render_views.sh`, `validate.sh` |
 | `docs/` | Guides and BOM, `render/` (three.js scene that renders every view through headless Chrome) |
 | `.github/workflows/ci.yml` | Native tests, both ESP32 builds, generator reproducibility, OpenSCAD export |
 

@@ -62,11 +62,12 @@ def logo_png(abbr: str) -> Image.Image:
 
 
 def to_rgb565a8(img: Image.Image, size: int):
-    img = img.copy()
+    # resize in premultiplied alpha ("RGBa") so transparent pixels don't bleed into the edges
+    img = img.convert("RGBa")
     img.thumbnail((size, size), Image.LANCZOS)
+    img = img.convert("RGBA")
     canvas = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     canvas.paste(img, ((size - img.width) // 2, (size - img.height) // 2), img)
-    # premultiply against black so edge halos don't show on the dark background
     px = canvas.load()
     rgb = bytearray()
     alpha = bytearray()

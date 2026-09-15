@@ -15,6 +15,7 @@ static bool longFired = false;
 static const uint32_t LONG_MS = 800;
 static const uint32_t DEBOUNCE_MS = 40;
 static const int Z_THRESHOLD = 400;
+static const int RELEASE_SAMPLES = 3;   // x 15 ms poll = 45 ms
 
 static uint16_t readChannel(uint8_t cmd) {
   touchSpi.transfer(cmd);
@@ -26,13 +27,16 @@ static bool pressed() {
   if (digitalRead(TOUCH_IRQ) == HIGH) return false;   // PENIRQ is active low
   touchSpi.beginTransaction(SPISettings(2500000, MSBFIRST, SPI_MODE0));
   digitalWrite(TOUCH_CS, LOW);
-  int z1 = readChannel(0xB1);   // Z1, differential, power on
-  int z2 = readChannel(0xC1);   // Z2
-  readChannel(0xD0);            // dummy X read with power-down so PENIRQ re-arms
+  int z = 0;
+  for (int i = 0; i < 2; i++) {          // average two reads; resistive panels are noisy
+    int z1 = readChannel(0xB1);          // Z1, differential, power on
+    int z2 = readChannel(0xC1);          // Z2
+    z += z1 + 4095 - z2;
+  }
+  readChannel(0xD0);                     // dummy X read with power-down so PENIRQ re-arms
   digitalWrite(TOUCH_CS, HIGH);
   touchSpi.endTransaction();
-  int z = z1 + 4095 - z2;
-  return z > Z_THRESHOLD;
+  return z / 2 > Z_THRESHOLD;
 }
 
 void touch_init() {
@@ -51,7 +55,12 @@ void touch_tick() {
   if (now - lastPoll < 15) return;
   lastPoll = now;
 
-  bool down = pressed();
+  // a release needs RELEASE_SAMPLES consecutive "up" reads: one pressure dropout mid-press
+  // would otherwise register as release + new press = a double tap
+  static int upCount = 0;
+  bool raw = pressed();
+  if (raw) upCount = 0; else if (upCount < RELEASE_SAMPLES) upCount++;
+  bool down = raw || (wasDown && upCount < RELEASE_SAMPLES);
   if (down && !wasDown) {
     downAt = now;
     longFired = false;

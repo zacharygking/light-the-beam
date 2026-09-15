@@ -8,7 +8,7 @@ Reads models/printables/base_220.stl (binary STL), slices it, and reports:
   - the wire channel exit: where the wall is open near the floor
   - the height of the inner box the lid seats on
 
-Usage: python3 tools/measure_arena.py [--png]   (--png also writes slice images to docs/render/)
+Usage: python3 tools/measure_arena.py
 """
 import math
 import struct
@@ -22,14 +22,26 @@ OUT = ROOT / "models" / "arena_outline.scad"
 
 
 def read_stl(path):
-    with open(path, "rb") as f:
-        f.read(80)
-        n = struct.unpack("<I", f.read(4))[0]
-        data = f.read()
-    return [struct.unpack_from("<12fH", data, i * 50)[3:12] for i in range(n)]
+    """Binary or ASCII STL -> list of 9-tuples (three vertices)."""
+    raw = open(path, "rb").read()
+    n = struct.unpack("<I", raw[80:84])[0] if len(raw) >= 84 else -1
+    if len(raw) == 84 + n * 50:
+        return [struct.unpack_from("<12fH", raw, 84 + i * 50)[3:12] for i in range(n)]
+    tris, cur = [], []
+    for line in raw.decode("ascii", "ignore").splitlines():
+        parts = line.split()
+        if len(parts) == 4 and parts[0] == "vertex":
+            cur += [float(v) for v in parts[1:]]
+            if len(cur) == 9:
+                tris.append(tuple(cur))
+                cur = []
+    if not tris:
+        raise SystemExit(f"{path}: not a binary or ASCII STL")
+    return tris
 
 
 def slice_z(tris, z):
+    z += 0.013   # never cut exactly through a vertex: that drops the edge and breaks the loop
     segs = []
     for t in tris:
         P = [(t[0], t[1], t[2]), (t[3], t[4], t[5]), (t[6], t[7], t[8])]
@@ -115,7 +127,7 @@ def main():
     foot = max(loops(slice_z(tris, 0.3)), key=perim)
     x0, x1, y0, y1 = bbox(foot)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-    simp = rdp([(p[0] - cx, p[1] - cy) for p in foot], 0.4)
+    simp = rdp([(p[0] - cx, p[1] - cy) for p in foot], 0.15)   # chords lie inside arcs; keep the error small
     print(f"footprint {x1 - x0:.1f} x {y1 - y0:.1f} mm, centre ({cx:.1f}, {cy:.1f}) in STL coords, {len(simp)} outline points")
 
     # floor thickness: first z where a second big loop (the well) appears
@@ -127,22 +139,25 @@ def main():
             floor_t = z
             well = min(big, key=perim)
             break
+    if floor_t is None:
+        sys.exit("no interior cavity found below 6 mm; is this the arena base?")
     wx0, wx1, wy0, wy1 = bbox(well)
-    print(f"floor thickness ~{floor_t} mm; inner well {wx1 - wx0:.0f} x {wy1 - wy0:.0f} mm, centre offset from footprint centre ({(wx0 + wx1) / 2 - cx:+.1f}, {(wy0 + wy1) / 2 - cy:+.1f})")
+    print(f"floor thickness ~{floor_t} mm; octagonal well {wx1 - wx0:.0f} x {wy1 - wy0:.0f} mm, centre offset from footprint centre ({(wx0 + wx1) / 2 - cx:+.1f}, {(wy0 + wy1) / 2 - cy:+.1f})")
 
-    # wire channel: heights where the outer wall and the well are joined into one loop
+    # wire channel: heights where the outer wall and the well are joined into one loop, and the
+    # opening in the flat wall (a gap in the run of outline points on the wall face)
     joined = [z for z in (3, 4, 5, 6, 7, 8, 9, 10, 11, 12) if len([l for l in loops(slice_z(tris, z)) if perim(l) > 200]) == 1]
-    ring = max(loops(slice_z(tris, 5)), key=perim)
-    jumps = []
-    for i in range(len(ring) - 1):
-        a, b = ring[i], ring[i + 1]
-        ra, rb = math.hypot(a[0] - cx, a[1] - cy), math.hypot(b[0] - cx, b[1] - cy)
-        if abs(ra - rb) > 6:
-            jumps.append((a[0] - cx, a[1] - cy))
-    if jumps:
-        ex = sum(p[0] for p in jumps) / len(jumps)
-        ey = sum(p[1] for p in jumps) / len(jumps)
-        print(f"wire exit through the wall at ~({ex:+.0f}, {ey:+.0f}) from footprint centre, angle {math.degrees(math.atan2(ey, ex)):.0f} deg, open at z {min(joined)}..{max(joined)} mm")
+    ring = max(loops(slice_z(tris, 6)), key=perim)
+    xmax = max(p[0] for p in ring)
+    face_ys = sorted(p[1] - cy for p in ring if p[0] > xmax - 4)
+    gaps = [(face_ys[i], face_ys[i + 1]) for i in range(len(face_ys) - 1) if face_ys[i + 1] - face_ys[i] > 6]
+    exit_span = None
+    if gaps and joined:
+        g = max(gaps, key=lambda g: g[1] - g[0])
+        exit_span = (g[0], g[1])
+        print(f"wire exit: opening in the flat wall (x = {xmax - cx:+.0f}) spanning y {g[0]:+.0f}..{g[1]:+.0f} from footprint centre, open at z {min(joined)}..{max(joined)} mm")
+    else:
+        print("wire exit: not found (no gap in the flat wall face)")
     # lid seat: top of the inner box = highest z with an inner-box loop
     seat = None
     for z10 in range(560, 300, -5):
@@ -159,7 +174,7 @@ def main():
         "arena_outline = [\n" + ",\n".join(f"  [{x:.2f}, {y:.2f}]" for x, y in simp) + "\n];\n"
         f"arena_outline_size = [{x1 - x0:.2f}, {y1 - y0:.2f}];\n"
         f"arena_well_offset = [{(wx0 + wx1) / 2 - cx:.2f}, {(wy0 + wy1) / 2 - cy:.2f}];\n"
-        + (f"arena_wire_exit = [{ex:.1f}, {ey:.1f}];\n" if jumps else "")
+        + (f"arena_wire_exit = [{xmax - cx:.1f}, {(exit_span[0] + exit_span[1]) / 2:.1f}];  // wall opening centre; spans y {exit_span[0]:.1f}..{exit_span[1]:.1f}\n" if exit_span else "")
     )
     print(f"wrote {OUT.relative_to(ROOT)}")
 

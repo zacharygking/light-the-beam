@@ -32,6 +32,7 @@ FetchResult fetch(GameState& out, int* httpCode) {
   http.setUserAgent(ESPN_USER_AGENT);   // see config.h: browser-like UAs get a 403
   if (!http.begin(client, ESPN_URL)) return FetchResult::HttpError;
   http.addHeader("Accept", "application/json");
+  http.addHeader("Accept-Encoding", "identity");   // a Content-Length body avoids StreamString regrowth on chunked replies
 
   int code = http.GET();
   if (httpCode) *httpCode = code;
@@ -44,6 +45,7 @@ FetchResult fetch(GameState& out, int* httpCode) {
   // The body may be chunked; getString() de-chunks it. ~21 KB, fits comfortably in heap.
   String body = http.getString();
   http.end();
+  log_i("ESPN body %u bytes, heap %u (max block %u)", body.length(), ESP.getFreeHeap(), ESP.getMaxAllocHeap());
 
   GameState parsed;
   bool ok = parseGameState(body, parsed, TEAM_ABBR);

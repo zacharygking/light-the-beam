@@ -5,20 +5,30 @@
 // Build with -DDEMO_MODE to skip WiFi and cycle NEXT → LIVE → FINAL from canned data.
 #include <Arduino.h>
 #include <WiFi.h>
+#include <Preferences.h>
 #include <time.h>
 #include "config.h"
 #include "game_state.h"
+#include "beam_policy.h"
 #include "kings_api.h"
 #include "ui.h"
 #include "beam.h"
 #include "touch.h"
 
+// TLS handshakes and LVGL's software renderer both run on the Arduino loop task; the default
+// 8 KB stack is the usual overflow on CYD + LVGL 9 builds.
+SET_LOOP_TASK_STACK_SIZE(16 * 1024);
+
 #ifndef DEMO_MODE
 #include <WiFiManager.h>
 static WiFiManager wm;
 static bool portalActive = false;
+static uint32_t noWifiSince = 0;              // millis() of the first consecutive NoWifi result
+static const uint32_t PORTAL_TIMEOUT_S = 180;  // portal closes itself after this
+static const uint32_t REOPEN_PORTAL_MS = 10UL * 60UL * 1000UL;   // no WiFi this long → offer setup again
 #endif
 
+static Preferences prefs;
 static GameState game;
 static bool haveGame = false;
 static bool offline = false;
@@ -27,60 +37,49 @@ static uint32_t beamLitAt = 0;
 static char celebratedEvent[16] = "";
 static bool timeSynced = false;
 
-// ---- scheduling --------------------------------------------------------------
-static uint32_t pollIntervalFor(const GameState& gs, time_t now) {
-  switch (gs.status) {
-    case GameStatus::Live: return POLL_LIVE_MS;
-    case GameStatus::Post: return POLL_POST_MS;
-    case GameStatus::Pre: {
-      if (gs.tipoffEpoch && now > 1600000000 && gs.tipoffEpoch - now < PRE_SOON_WINDOW_S) return POLL_PRE_SOON_MS;
-      return POLL_PRE_MS;
-    }
-    default: return POLL_PRE_MS;
-  }
+static int64_t nowEpoch() {
+  time_t t = time(nullptr);
+  return t > 1600000000 ? (int64_t)t : 0;   // 0 = clock not synced yet
 }
 
+// ---- game state → screen + beam --------------------------------------------------
 static void applyGame(const GameState& gs) {
-  time_t now = time(nullptr);
-  bool newEvent = strcmp(gs.eventId, game.eventId) != 0;
+  int64_t now = nowEpoch();
+  BeamDecision d = beamPolicy(beam_mode(), game, gs, celebratedEvent, now, BEAM_HOLD_HOURS);
   game = gs;
   haveGame = true;
 
-  // Beam policy
-  if (gs.status == GameStatus::Live) {
-    if (!beam_is_lit()) beam_set_mode(BeamMode::Pulse);
-  } else if (gs.status == GameStatus::Post && gs.weWon()) {
-    if (strcmp(celebratedEvent, gs.eventId) != 0) {
-      strncpy(celebratedEvent, gs.eventId, sizeof celebratedEvent - 1);
-      beam_set_mode(BeamMode::Rise);
-      beamLitAt = millis();
-      log_i("KINGS WIN %d-%d — light the beam", gs.us.score, gs.them.score);
-    }
-  } else if (gs.status == GameStatus::Post) {
-    if (beam_mode() == BeamMode::Pulse) beam_set_mode(BeamMode::Off);
-  } else if (gs.status == GameStatus::Pre && newEvent) {
-    // a new game is up: previous celebration is over
-    if (beam_is_lit() || beam_mode() == BeamMode::Pulse) beam_set_mode(BeamMode::Off);
+  if (d.celebrate) {
+    strncpy(celebratedEvent, gs.eventId, sizeof celebratedEvent - 1);
+    prefs.putString("celeb", celebratedEvent);   // survives a reboot: no encore after a power blip
+    beamLitAt = millis();
+    log_i("KINGS WIN %d-%d — light the beam", gs.us.score, gs.them.score);
   }
+  if (d.mode != beam_mode()) beam_set_mode(d.mode);
+
   ui_show_game(game, beam_is_lit());
-  nextPollAt = millis() + pollIntervalFor(game, now);
+  nextPollAt = millis() + pollIntervalMs(game, now, POLL_PRE_MS, POLL_PRE_SOON_MS, POLL_LIVE_MS, POLL_POST_MS, PRE_SOON_WINDOW_S);
 }
 
 static void poll() {
 #ifndef DEMO_MODE
   GameState gs;
   int code = 0;
-  ui_show_boot(haveGame ? "REFRESHING" : "FETCHING SCHEDULE");
-  if (!haveGame) ui_tick(time(nullptr));
+  if (!haveGame) { ui_show_boot("FETCHING SCHEDULE"); ui_flush(); }
   kings::FetchResult r = kings::fetch(gs, &code);
   log_i("fetch: %s (http %d) heap %u", kings::fetchResultName(r), code, ESP.getFreeHeap());
   if (r == kings::FetchResult::Ok) {
     offline = false;
+    noWifiSince = 0;
     applyGame(gs);
   } else {
     offline = true;
-    if (haveGame) ui_show_game(game, beam_is_lit());
-    else ui_show_boot(r == kings::FetchResult::NoWifi ? "NO WIFI \xC2\xB7 RETRYING" : "ESPN UNREACHABLE \xC2\xB7 RETRYING");
+    if (r == kings::FetchResult::NoWifi) { if (!noWifiSince) noWifiSince = millis(); }
+    else noWifiSince = 0;
+    if (!haveGame) {
+      ui_show_boot(r == kings::FetchResult::NoWifi ? "NO WIFI \xC2\xB7 RETRYING" : "ESPN UNREACHABLE \xC2\xB7 RETRYING");
+      ui_flush();
+    }
     nextPollAt = millis() + POLL_ERROR_MS;
   }
   ui_set_offline(offline);
@@ -100,8 +99,8 @@ static void nightTick() {
   static uint32_t last = 0;
   if (millis() - last < 30000) return;
   last = millis();
+  if (!nowEpoch()) return;   // clock not set yet
   time_t now = time(nullptr);
-  if (now < 1600000000) return;   // clock not set yet
   struct tm lt;
   localtime_r(&now, &lt);
   bool night = (NIGHT_START_HOUR > NIGHT_END_HOUR)
@@ -143,15 +142,38 @@ static void demoTick() {
 }
 #endif
 
+// ---- WiFi --------------------------------------------------------------------
+#ifndef DEMO_MODE
+static void onWifiUp(const char* how) {
+  portalActive = false;
+  noWifiSince = 0;
+  log_i("WiFi connected (%s): %s", how, WiFi.localIP().toString().c_str());
+  configTzTime(TZ_POSIX, NTP_SERVER);
+  ui_show_boot("CONNECTED");
+  ui_flush();
+  nextPollAt = millis() + 1000;
+}
+
+static void openPortal() {
+  portalActive = true;
+  ui_show_wifi_setup(WIFI_PORTAL_SSID);
+  ui_flush();
+  wm.startConfigPortal(WIFI_PORTAL_SSID);   // non-blocking; loop() drives wm.process()
+}
+#endif
+
 // ---- arduino -----------------------------------------------------------------
 void setup() {
   Serial.begin(115200);
   delay(100);
   log_i("Kings beam boot, heap %u", ESP.getFreeHeap());
 
+  prefs.begin("kingsbeam", false);
+  prefs.getString("celeb", celebratedEvent, sizeof celebratedEvent);
+
   ui_init();
   ui_show_boot("STARTING");
-  ui_tick(0);
+  ui_flush();
   beam_init();
   touch_init();
   touch_set_tap(onTap);
@@ -168,16 +190,21 @@ void setup() {
   WiFi.mode(WIFI_STA);
   wm.setConfigPortalBlocking(false);
   wm.setConnectTimeout(20);
+  // The portal closes itself after 3 minutes. If credentials are saved (a router that was
+  // still booting after a power cut), restart and try them again instead of sitting on the
+  // setup screen forever.
+  wm.setConfigPortalTimeout(PORTAL_TIMEOUT_S);
+  wm.setConfigPortalTimeoutCallback([]() {
+    if (wm.getWiFiIsSaved()) { log_i("portal timed out with saved creds: restarting"); ESP.restart(); }
+  });
   wm.setAPCallback([](WiFiManager*) {
     portalActive = true;
     ui_show_wifi_setup(WIFI_PORTAL_SSID);
+    ui_flush();
   });
   ui_show_boot("CONNECTING TO WIFI");
-  ui_tick(0);
-  if (wm.autoConnect(WIFI_PORTAL_SSID)) {
-    log_i("WiFi connected: %s", WiFi.localIP().toString().c_str());
-    configTzTime(TZ_POSIX, NTP_SERVER);
-  }
+  ui_flush();
+  if (wm.autoConnect(WIFI_PORTAL_SSID)) onWifiUp("boot");
   nextPollAt = millis() + 1500;
 #endif
 }
@@ -194,16 +221,16 @@ void loop() {
 #else
   if (portalActive) {
     wm.process();
-    if (WiFi.status() == WL_CONNECTED) {
+    if (WiFi.status() == WL_CONNECTED) onWifiUp("portal");
+    else if (!wm.getConfigPortalActive()) {   // closed by its timeout without saved creds
       portalActive = false;
-      log_i("WiFi connected via portal");
-      configTzTime(TZ_POSIX, NTP_SERVER);
-      ui_show_boot("CONNECTED");
-      nextPollAt = millis() + 1000;
+      ui_show_boot("NO WIFI \xC2\xB7 RETRYING");
+      ui_flush();
+      nextPollAt = millis() + POLL_ERROR_MS;
     }
     return;
   }
-  if (!timeSynced && now > 1600000000) {
+  if (!timeSynced && nowEpoch()) {
     timeSynced = true;
     log_i("time synced");
     if (haveGame) ui_show_game(game, beam_is_lit());
@@ -211,9 +238,16 @@ void loop() {
   if ((int32_t)(millis() - nextPollAt) >= 0) {
     poll();
   }
+  // Saved network gone for good (moved house, new router): offer the setup portal again.
+  if (noWifiSince && millis() - noWifiSince > REOPEN_PORTAL_MS) {
+    log_i("no WiFi for %lu s: reopening the setup portal", (unsigned long)((millis() - noWifiSince) / 1000));
+    noWifiSince = 0;
+    openPortal();
+    return;
+  }
 #endif
 
-  // beam hold timeout after a win
+  // beam hold timeout after a win (or a manual light)
   if (beam_is_lit() && beamLitAt && millis() - beamLitAt > (uint32_t)BEAM_HOLD_HOURS * 3600000UL) {
     beam_set_mode(BeamMode::Off);
     beamLitAt = 0;
