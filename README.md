@@ -85,6 +85,10 @@ Print the console test part (`plinth_test.stl`, about 40 minutes) before the ful
 
 Firmware builds and the parser is tested against real responses, but nothing has run on hardware yet. The three things most likely to need a tweak on first flash are display rotation, the touch pressure threshold, and the first LED's data level. The preseason opener is October 5, 2026 (LAL @ SAC); the live and final screens get their first real data then.
 
+## Ideas for v2
+
+**Live win probability on the LIVE screen.** A small logistic model (score margin, seconds remaining, period, home/away) fitted offline in Python on public NBA play-by-play data, exported as a handful of coefficients into a header, and evaluated on the board in a few lines of C++. It would show as a pill under the score, e.g. "SAC 78%". It costs no extra API calls: every input is already in the ESPN response the firmware polls during a game. The training script, its calibration curve and Brier score, and a JSONL of predictions against outcomes would live in `tools/` and `docs/` so the numbers are reproducible. Waiting on real live fixtures from the October 2026 preseason games before starting.
+
 ## Credits
 
 Arena model by [Dave Lack](https://www.printables.com/@DaveLack_475585) on Printables. Scores from ESPN's public API. Team logos are NBA/ESPN property, embedded for personal use. Barlow Condensed by Jeremy Tribby, SIL Open Font License. Built with [PlatformIO](https://platformio.org), [LVGL](https://lvgl.io), [FastLED](https://fastled.io), [ArduinoJson](https://arduinojson.org), [WiFiManager](https://github.com/tzapu/WiFiManager), [OpenSCAD](https://openscad.org) and [three.js](https://threejs.org).
