@@ -71,6 +71,23 @@
   .sketch svg { width: 100%; height: auto; display: block; }
   .sketch text { font-family: Barlow, sans-serif; font-size: 10px; fill: var(--ink); }
   .sketch .sm { font-size: 8.5px; fill: var(--muted); }
+  .dg svg { width: 100%; height: auto; display: block; }
+  .dg text { font-family: Barlow, sans-serif; font-size: 10px; fill: #1d1830; }
+  .dg .sm { font-size: 8.5px; fill: #6b6482; }
+  .dg .cap { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 12px; fill: #5a2d81; }
+  .dg .k { font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 11px; fill: #fff; }
+  .dg .ln { fill: none; stroke: #1d1830; stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+  .dg .ln2 { fill: none; stroke: #1d1830; stroke-width: 1; stroke-linejoin: round; }
+  .dg .fill { fill: #f4f2f8; stroke: #1d1830; stroke-width: 1.4; stroke-linejoin: round; }
+  .dg .part { fill: #e6dcf3; stroke: #5a2d81; stroke-width: 1.6; stroke-linejoin: round; }
+  .dg .dark { fill: #2a2540; stroke: #1d1830; stroke-width: 1.2; }
+  .dg .ghost { fill: none; stroke: #8d86a3; stroke-width: 1; stroke-dasharray: 3 3; }
+  .dg .arrow { fill: none; stroke: #5a2d81; stroke-width: 2; marker-end: url(#ah); }
+  .dg .dim { fill: none; stroke: #6b6482; stroke-width: .8; }
+  .dg .badge { fill: #5a2d81; }
+  .dg figcaption { font-size: 9pt; color: #6b6482; margin-top: 4pt; }
+  .dgrow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12pt; }
+  .dgrow.two { grid-template-columns: 1fr 1fr; }
 </style>
 </head>
 <body>
@@ -95,10 +112,10 @@
   <div class="toc">
     <div><b>Part 1 · Print the parts</b><span>p. 3–4 · ~18 h printer time</span></div>
     <div><b>Part 2 · Flash the board</b><span>p. 5 · 20 min</span></div>
-    <div><b>Part 3 · Build the beam</b><span>p. 6–7 · 20 min</span></div>
-    <div><b>Part 4 · Arena and plinth</b><span>p. 8–10 · 30 min</span></div>
-    <div><b>Part 5 · Power on and set up</b><span>p. 11 · 10 min</span></div>
-    <div><b>Using it · Troubleshooting · Specs</b><span>p. 12–13</span></div>
+    <div><b>Part 3 · Build the beam</b><span>p. 6–8 · 25 min</span></div>
+    <div><b>Part 4 · Arena and plinth</b><span>p. 9–12 · 30 min</span></div>
+    <div><b>Part 5 · Power on and set up</b><span>p. 13 · 10 min</span></div>
+    <div><b>Using it · Troubleshooting · Specs</b><span>p. 14–15</span></div>
   </div>
 
   <h3 style="margin-top:14pt">Parts list</h3>
@@ -129,7 +146,7 @@
     <div>A computer with a USB port (for flashing, once)</div>
     <div>Isopropyl alcohol wipe (for the socket glue joint)</div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>2</span></div>
+  <div class="folio"><span>Light the Beam</span><span>1</span></div>
 </section>
 
 <!-- ============================ PART 1: PRINT (page 3) ============================ -->
@@ -171,7 +188,7 @@
 make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, beam_tube.stl, beam_spine.stl, beam_socket.stl</pre>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>3</span></div>
+  <div class="folio"><span>Light the Beam</span><span>2</span></div>
 </section>
 
 <!-- ============================ PART 1: PRINT (page 4) ============================ -->
@@ -216,7 +233,7 @@ make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, be
       <div class="note"><b>Plate layout.</b> The base alone fills most of the plate. Print it on its own, then lid + spine + socket together, then the plinth on its own, then the tube on its own (a 250 mm vase print doesn't like neighbours).</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>4</span></div>
+  <div class="folio"><span>Light the Beam</span><span>3</span></div>
 </section>
 
 <!-- ============================ PART 2: FLASH (page 5) ============================ -->
@@ -247,7 +264,7 @@ pio run -e cyd_demo -t upload</pre>
         <li>Watch the end of the output for <code>SUCCESS</code>. The board restarts by itself.</li>
       </ol>
       <div class="check">The screen lights up and cycles every 9 seconds: <b>NEXT GAME</b> (logos, countdown) → <b>LIVE</b> (big score) → <b>FINAL · LIGHT THE BEAM</b>. Tap the screen: nothing visible yet (no strip), but the touch is being read.</div>
-      <div class="warn"><b>If the upload fails with "no serial port"</b>: unplug, plug back in, run again. If it still fails, hold the board's <b>BOOT</b> button while the upload starts, release after "Connecting…". If the picture is upside down or the colours are inverted, see Troubleshooting on page 13 and reflash.</div>
+      <div class="warn"><b>If the upload fails with "no serial port"</b>: unplug, plug back in, run again. If it still fails, hold the board's <b>BOOT</b> button while the upload starts, release after "Connecting…". If the picture is upside down or the colours are inverted, see Troubleshooting on page 15 and reflash.</div>
     </div>
   </div>
   <div class="step full">
@@ -258,7 +275,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="note"><b>Want to watch it think?</b> <code>pio device monitor -b 115200</code> shows the log: WiFi, each ESPN fetch, and the beam decisions.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>5</span></div>
+  <div class="folio"><span>Light the Beam</span><span>4</span></div>
 </section>
 
 <!-- ============================ PART 3: BEAM (page 6) ============================ -->
@@ -277,7 +294,22 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="warn"><b>Cut on the line, not through an LED.</b> Cutting anywhere else kills the LED on each side of the cut. If you slip, cut on the next line and live with 14 LEDs; the firmware doesn't mind.</div>
     </div>
-    <img class="render" src="render/strip.png" alt="Strip cut to 15 LEDs beside the spine">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 360 200" role="img" aria-label="Where to cut the LED strip: on the pad line after the 15th LED, counting from the wired end"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<rect x="20" y="70" width="330" height="40" class="dark"/>
+<rect x="34" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="53" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="72" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="91" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="110" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="129" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="148" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="167" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="186" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="205" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="224" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="243" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="262" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="281" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="300" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="319" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/><rect x="338" y="80" width="12" height="20" rx="1" fill="#f2e9ff" stroke="#8d86a3"/>
+<path d="M45 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M64 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M83 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M102 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M121 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M140 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M159 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M178 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M197 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M216 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M235 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M254 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M273 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M292 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M311 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M330 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/><path d="M349 86 l4 4 l-4 4" fill="none" stroke="#b48ae6" stroke-width="1.2"/>
+<g stroke="#e0b64a" stroke-width="3"><line x1="317" y1="74" x2="317" y2="80"/><line x1="317" y1="86" x2="317" y2="94"/><line x1="317" y1="100" x2="317" y2="106"/></g>
+<line x1="317" y1="62" x2="317" y2="118" stroke="#5a2d81" stroke-width="1.5" stroke-dasharray="4 3"/>
+<path d="M0 60 C6 66 6 74 0 80" transform="translate(317 0)" class="ln"/>
+<path d="M8 70 l6 -2 M8 71 l6 2" transform="translate(300 45)" class="ln"/>
+<text x="317" y="132" text-anchor="middle" class="cap">CUT HERE</text>
+<text x="317" y="144" text-anchor="middle" class="sm">on the line through the copper pads</text>
+<path d="M20 90 L4 90" class="ln"/><path d="M20 82 L4 82 M20 98 L4 98" stroke="#d0342c" stroke-width="2"/>
+<text x="4" y="164" class="sm">wired end (input) — keep this end</text>
+<path d="M60 160 L30 122" class="arrow"/>
+<text x="180" y="50" text-anchor="middle">arrows point away from the wires: 1 … 15</text>
+<text x="40" y="188" class="sm">LED 1</text><text x="290" y="188" class="sm">LED 15</text><text x="326" y="188" class="sm">16 (spare)</text>
+</svg><figcaption>Count 15 LEDs from the wired end. Cut on the pad line after the 15th, never through an LED.</figcaption></figure>
   </div>
   <div class="step">
     <div>
@@ -308,7 +340,7 @@ pio run -e cyd_demo -t upload</pre>
       <text x="20" y="160" class="sm">spine F</text>
     </svg></div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>6</span></div>
+  <div class="folio"><span>Light the Beam</span><span>5</span></div>
 </section>
 
 <!-- ============================ PART 3: BEAM (page 7) ============================ -->
@@ -326,7 +358,23 @@ pio run -e cyd_demo -t upload</pre>
       <div class="note"><b>Stuck halfway?</b> The single-wall tube can be slightly oval. Rotate the spine 90° and try again, or gently squeeze the tube round. Never force it; the wall is 0.45 mm.</div>
       <div class="note"><b>Optional:</b> one small dab of hot glue where a spine foot meets the flange stops the spine sliding out when you tip the tube. Keep glue off the strip.</div>
     </div>
-    <img class="render" src="render/beam.png" alt="Spine with strip inside the tube, socket below">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 300 300" role="img" aria-label="Section: the spine slides up into the tube from the foot; the feet stop against the flange; wires exit below"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M120 20 L120 250 L104 250 L104 262 L176 262 L176 250 L160 250 L160 20" class="fill"/>
+<path d="M126 20 L126 250 M154 20 L154 250" class="ghost"/>
+<text x="176" y="40">tube E (section)</text>
+<text x="176" y="52" class="sm">single 0.45 mm wall</text>
+<g transform="translate(0 40)">
+<rect x="134" y="20" width="12" height="230" class="part"/>
+<rect x="128" y="246" width="24" height="6" class="part"/>
+<rect x="146" y="30" width="3" height="212" fill="#151515"/>
+<rect x="149" y="36" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="50" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="64" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="78" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="92" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="106" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="120" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="134" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="148" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="162" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="176" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="190" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="204" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="218" width="3" height="5" fill="#c9a2f0"/><rect x="149" y="232" width="3" height="5" fill="#c9a2f0"/>
+</g>
+<path d="M140 296 L140 260" class="arrow"/>
+<text x="176" y="270" class="sm">slide up from the foot</text>
+<text x="176" y="230">feet stop here</text><path d="M172 232 L156 288" class="dim"/>
+<path d="M141 292 C141 300 130 302 120 304" stroke="#d0342c" stroke-width="1.5" fill="none"/>
+<text x="20" y="120" class="sm">LEDs face</text><text x="20" y="132" class="sm">the wall</text><path d="M60 126 L118 126" class="dim"/>
+</svg><figcaption>The spine goes in top-first through the foot opening; its feet stop against the inside of the flange.</figcaption></figure>
   </div>
   <div class="step full">
     <div>
@@ -335,7 +383,7 @@ pio run -e cyd_demo -t upload</pre>
       <ol class="do">
         <li>Find the two small <b>pigtail leads</b> that came with board <b>H</b>: thin cables with a tiny white plug on one end and bare tinned wires on the other. Plug one into the 4-pin socket labelled <b>P1</b> (near the USB port) and one into <b>CN1</b> (the 4-pin socket on the edge).</li>
         <li>Identify the wires using the printed labels next to each socket. You need three: <b>VIN</b> and <b>GND</b> from P1, and <b>IO22</b> from CN1. Put a bit of tape on each and write the name on it. Fold any unused wires back and tape them so they can't touch anything.</li>
-        <li>Open the three lever connectors <b>J</b> (flip the orange levers up). Make three joints, one per connector, matching the table on page 10: <b>VIN ↔ red</b>, <b>GND ↔ white/black</b>, <b>IO22 ↔ green</b>. Push each bare wire in until it stops, then close the lever. The board's pigtail wires are thin: fold the bare end back on itself once so it's doubled before inserting.</li>
+        <li>Open the three lever connectors <b>J</b> (flip the orange levers up). Make three joints, one per connector, matching the diagrams on the next page: <b>VIN ↔ red</b>, <b>GND ↔ white/black</b>, <b>IO22 ↔ green</b>. Push each bare wire in until it stops, then close the lever. The board's pigtail wires are thin: fold the bare end back on itself once so it's doubled before inserting.</li>
         <li>Tug each wire gently. None should pull out.</li>
         <li>Plug the board into the USB adapter <b>K</b>. It boots to WIFI SETUP. <b>Tap the screen once.</b></li>
       </ol>
@@ -343,6 +391,58 @@ pio run -e cyd_demo -t upload</pre>
       <div class="warn"><b>Nothing lights?</b> Unplug first. Check green is on IO22 (not IO27) and red is on VIN (not 3V3). Check the strip's arrows point away from the wired end. <b>Only the first LED lights, or colours flicker?</b> The data signal is marginal: shorten the green lead, or add the optional 74AHCT125 level shifter between IO22 and the strip.</div>
     </div>
   </div>
+  <div class="folio"><span>Light the Beam</span><span>6</span></div>
+</section>
+
+<!-- ============================ WIRING REFERENCE ============================ -->
+<section class="page">
+  <div class="eyebrow">Part 3 · Build the beam</div>
+  <h2>Wiring reference</h2>
+  <p>Three wires, three connectors. This is the same for the bench test (step 13) and the final assembly (step 18).</p>
+  <table style="margin-bottom:8pt">
+    <tr><th>Board pigtail</th><th>Strip wire</th><th>Carries</th><th>Connector</th></tr>
+    <tr><td><span class="wire" style="background:#d0342c"></span><b>VIN</b> (P1)</td><td><span class="wire" style="background:#d0342c"></span>Red</td><td>5 V power</td><td>J1</td></tr>
+    <tr><td><span class="wire" style="background:#202020"></span><b>GND</b> (P1)</td><td><span class="wire" style="background:#e8e8e8"></span>White (or black)</td><td>Ground</td><td>J2</td></tr>
+    <tr><td><span class="wire" style="background:#2f9e44"></span><b>IO22</b> (CN1)</td><td><span class="wire" style="background:#2f9e44"></span>Green</td><td>Data</td><td>J3</td></tr>
+  </table>
+      <div class="dgrow two" style="margin-top:10pt;grid-template-columns:1.2fr 1fr;align-items:start"><figure class="dg" style="margin:0"><svg viewBox="0 0 360 240" role="img" aria-label="Back of the display board: micro-USB on the left edge, P1 socket beside it with VIN TX RX GND, CN1 socket on the bottom edge with GND IO22 IO27 3V3"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<rect x="40" y="40" width="280" height="160" rx="4" fill="#dfeee5" stroke="#1d1830" stroke-width="1.4"/>
+<text x="180" y="66" text-anchor="middle" class="sm">back of board H (screen faces away from you)</text>
+<rect x="24" y="86" width="22" height="16" class="dark"/><text x="8" y="120" class="sm">micro-USB</text>
+<rect x="60" y="82" width="34" height="14" rx="2" class="part"/><text x="60" y="76" class="cap">P1</text>
+<text x="60" y="112" class="sm">VIN  TX  RX  GND</text>
+<rect x="190" y="182" width="34" height="14" rx="2" class="part"/><text x="190" y="176" class="cap">CN1</text>
+<text x="150" y="218" class="sm">GND  IO22  IO27  3V3</text>
+<rect x="270" y="150" width="40" height="30" rx="2" fill="#c8c4d4" stroke="#1d1830"/><text x="272" y="142" class="sm">SD slot</text>
+<rect x="130" y="100" width="60" height="40" rx="3" fill="#bdb8cc" stroke="#1d1830"/><text x="160" y="124" text-anchor="middle" class="sm">ESP32</text>
+<path d="M60 89 L14 60" stroke="#d0342c" stroke-width="2" fill="none"/><text x="4" y="52" class="sm" style="fill:#d0342c">VIN → red</text>
+<path d="M92 89 L110 30" stroke="#202020" stroke-width="2" fill="none"/><text x="96" y="24" class="sm">GND → white/black</text>
+<path d="M200 189 L200 232" stroke="#2f9e44" stroke-width="2" fill="none"/><text x="206" y="236" class="sm" style="fill:#2f9e44">IO22 → green</text>
+<text x="230" y="90" class="sm">Sockets are labelled on the</text><text x="230" y="102" class="sm">board; positions vary a</text><text x="230" y="114" class="sm">little between batches.</text>
+</svg><figcaption>The two pigtails plug into P1 and CN1. You use three of their wires: VIN, GND and IO22. Tape and label them.</figcaption></figure><figure class="dg" style="margin:0"><svg viewBox="0 0 360 200" role="img" aria-label="Using a lever nut: lift the lever, push the wire in to the stop, close the lever. Fold thin wire double first."><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<g transform="translate(10 30)">
+<rect x="10" y="30" width="70" height="50" rx="4" class="fill"/><rect x="20" y="2" width="16" height="30" rx="2" fill="#f58a1f" stroke="#1d1830" transform="rotate(-60 28 32)"/>
+<line x1="-10" y1="60" x2="30" y2="60" stroke="#d0342c" stroke-width="3"/>
+<text x="0" y="110" class="cap">1  LEVER UP</text>
+</g>
+<g transform="translate(130 30)">
+<rect x="10" y="30" width="70" height="50" rx="4" class="fill"/><rect x="20" y="2" width="16" height="30" rx="2" fill="#f58a1f" stroke="#1d1830" transform="rotate(-60 28 32)"/>
+<line x1="-10" y1="60" x2="60" y2="60" stroke="#d0342c" stroke-width="3"/><line x1="62" y1="48" x2="62" y2="72" stroke="#1d1830" stroke-width="1.5"/>
+<path d="M-4 48 L20 48" class="arrow"/>
+<text x="0" y="110" class="cap">2  PUSH TO THE STOP</text>
+</g>
+<g transform="translate(250 30)">
+<rect x="10" y="30" width="70" height="50" rx="4" class="fill"/><rect x="20" y="22" width="16" height="30" rx="2" fill="#f58a1f" stroke="#1d1830"/>
+<line x1="-10" y1="60" x2="60" y2="60" stroke="#d0342c" stroke-width="3"/>
+<text x="0" y="110" class="cap">3  LEVER DOWN</text><text x="0" y="122" class="sm">then tug: it must not move</text>
+</g>
+<g transform="translate(10 160)">
+<line x1="0" y1="10" x2="60" y2="10" stroke="#2f9e44" stroke-width="1.5"/><path d="M60 10 C72 10 72 16 60 16 L30 16" stroke="#2f9e44" stroke-width="1.5" fill="none"/>
+<text x="80" y="14">Thin board pigtail wire: fold the bare end back on itself so it's doubled, then insert.</text>
+</g>
+</svg><figcaption>One joint per connector: a board wire in one port, the matching strip wire in another. The third port stays empty.</figcaption></figure></div>
+
+  <div class="warn" style="margin-top:10pt"><b>Red goes to VIN, never to 3V3.</b> 3V3 can't supply the strip and you'll get a dim, flickering beam. <b>Green goes to IO22, not IO27</b> (they're neighbours on CN1). The unused wires on each pigtail (TX, RX, IO27, 3V3) get folded back and taped.</div>
   <div class="folio"><span>Light the Beam</span><span>7</span></div>
 </section>
 
@@ -388,7 +488,22 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="check">Tube stands straight, spins freely in the socket, wires exit the back of the arena with no strain on the strip.</div>
     </div>
-    <img class="render" src="render/lid.png" alt="Tube standing in the socket, lid above">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 240" role="img" aria-label="Section through the arena floor: socket glued at centre, tube foot dropped in, wires through the slot and out the back wall hole"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M20 200 L20 60 L34 60 L34 186 L286 186 L286 100 L300 100 L300 200 Z" class="fill"/>
+<rect x="286" y="150" width="14" height="16" fill="#fff" stroke="#1d1830"/><text x="238" y="146" class="sm">wire hole</text>
+<rect x="128" y="162" width="64" height="24" rx="2" class="part"/><text x="126" y="156" class="cap">socket G</text>
+<rect x="150" y="168" width="20" height="18" fill="#fff" stroke="#5a2d81"/>
+<rect x="170" y="172" width="22" height="8" fill="#fff" stroke="#5a2d81"/><text x="196" y="180" class="sm">slot → back</text>
+<rect x="152" y="20" width="16" height="152" fill="#f2e9ff" stroke="#8d86a3"/><rect x="148" y="166" width="24" height="6" fill="#f2e9ff" stroke="#8d86a3"/>
+<text x="176" y="40">tube E</text>
+<path d="M160 6 L160 30" class="arrow"/><text x="168" y="12" class="sm">drop in</text>
+<path d="M168 176 C200 176 220 176 260 176 C280 176 288 170 296 158" stroke="#d0342c" stroke-width="1.6" fill="none"/>
+<path d="M168 178 C200 178 224 178 262 178 C282 178 290 172 298 160" stroke="#2f9e44" stroke-width="1.6" fill="none"/>
+<path d="M128 196 L192 196" class="dim"/><path d="M128 192 L128 200 M192 192 L192 200" class="dim"/>
+<text x="160" y="212" text-anchor="middle" class="sm">glue ring, socket pressed flat</text>
+<text x="40" y="230" class="sm">arena A floor, front on the left</text>
+<path d="M160 214 L160 222" class="dim"/>
+</svg><figcaption>Glue the socket dead centre with its slot toward the back. Wires go through the slot, along the floor and out the wire hole.</figcaption></figure>
   </div>
   <div class="folio"><span>Light the Beam</span><span>8</span></div>
 </section>
@@ -396,7 +511,7 @@ pio run -e cyd_demo -t upload</pre>
 <!-- ============================ PART 4: PLINTH (page 9) ============================ -->
 <section class="page">
   <div class="eyebrow">Part 4 · Arena and plinth</div>
-  <h2>Fit the lid, seat the board</h2>
+  <h2>Fit the lid</h2>
   <div class="step">
     <div>
       <div class="stephead"><div class="num">16</div><h3>Fit the lid</h3><span class="time">1 min</span></div>
@@ -406,33 +521,84 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="check">The lid sits flat all round and the tube passes through the hole without touching its edge. If it touches, the socket is off-centre (step 14) or the hole isn't centred (step 5).</div>
     </div>
-    <img class="render" src="render/plinth_top.png" alt="Arena above the plinth">
-  </div>
-  <div class="step">
-    <div>
-      <div class="stephead"><div class="num">17</div><h3>Seat the display board in the plinth</h3><span class="time">5 min</span></div>
-      <ol class="do">
-        <li>Turn plinth <b>C</b> upside down on the table. Behind the front window you'll see the rectangular pocket; it's open toward you (the bottom).</li>
-        <li>Unplug the two pigtails from board <b>H</b> for a moment so nothing snags. Hold the board with the <b>screen facing the window</b> and the <b>USB port toward the bottom edge</b> of the plinth (toward you).</li>
-        <li>Slide the board into the pocket until the glass rests against the window lip. It's the same fit you tested in step 4.</li>
-        <li>Plug the two pigtails back into P1 and CN1. Plug the USB cable into the board.</li>
-        <li>Turn the plinth right side up and look at the screen through the window: the picture area should be centred.</li>
-      </ol>
-      <div class="note"><b>Loose?</b> A folded strip of masking tape on the back of the board (not the screen) takes up slack. The bottom lid's bump also presses the board up in step 18.</div>
-    </div>
-    <img class="render" src="render/cutaway.png" alt="Cutaway of the plinth with the board behind the window">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 200" role="img" aria-label="Lowering the lid over the tube until it rests on the arena rim"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M30 190 L30 120 L46 120 L46 176 L274 176 L274 120 L290 120 L290 190 Z" class="fill"/>
+<rect x="152" y="10" width="16" height="166" fill="#f2e9ff" stroke="#8d86a3"/>
+<g transform="translate(0 -40)"><path d="M24 100 L296 100 L296 112 L24 112 Z" class="part"/><rect x="150" y="98" width="20" height="16" fill="#fff" stroke="#5a2d81"/><text x="26" y="94" class="cap">lid B, hole 12.4 mm</text></g>
+<path d="M80 78 L80 112" class="arrow"/><path d="M240 78 L240 112" class="arrow"/>
+<text x="90" y="100" class="sm">lower straight down, keep it level</text>
+<text x="176" y="30">tube E</text>
+<text x="40" y="150" class="sm">arena A</text>
+<text x="300" y="124" class="sm">rim</text>
+</svg><figcaption>Keep the lid level as it goes on so the hole doesn't bind on the tube.</figcaption></figure>
   </div>
   <div class="folio"><span>Light the Beam</span><span>9</span></div>
 </section>
 
-<!-- ============================ PART 4: WIRING (page 10) ============================ -->
+<!-- ============================ SCREEN MOUNT (page 10) ============================ -->
+<section class="page">
+  <div class="eyebrow">Part 4 · Arena and plinth</div>
+  <h2>How the screen mounts</h2>
+  <p>The plinth has no screws. Behind the front window is a pocket, tilted back 20°, open toward the bottom. The board slides up into it from below; the window's lip stops the glass, and the bottom lid's bump holds the board up against that lip.</p>
+  <div class="dgrow two" style="margin-top:6pt"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Front view of the plinth: the window opening with the board's picture area centred behind it"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<rect x="10" y="40" width="220" height="120" rx="6" class="fill"/>
+<rect x="72" y="62" width="96" height="76" rx="3" class="dark"/>
+<rect x="60" y="54" width="120" height="92" rx="2" class="ghost"/>
+<rect x="80" y="70" width="80" height="60" fill="#1a1030" stroke="#b48ae6"/>
+<text x="120" y="104" text-anchor="middle" style="fill:#fff;font-family:Barlow Condensed;font-weight:700;font-size:16px">102  98</text>
+<text x="120" y="30" text-anchor="middle" class="cap">FRONT</text>
+<text x="10" y="178" class="sm">solid: window opening 60 × 46 · dashed: board behind the wall</text>
+<text x="120" y="192" text-anchor="middle" class="sm">picture area centred in the opening</text>
+</svg></figure><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Side section of the plinth front: the tilted pocket behind the window, the board sliding up from below, the lip that holds the glass, and the bottom lid bump"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<text x="120" y="30" text-anchor="middle" class="cap">SIDE, CUT THROUGH</text>
+<path d="M20 44 L220 44 L220 52 L200 52 L200 160 L220 160 L220 176 L20 176 L20 160 L40 160 L40 120 L30 120 L30 52 L20 52 Z" class="fill"/>
+<path d="M30 52 L30 72 L40 72 M30 100 L30 120" class="ln"/>
+<rect x="24" y="74" width="10" height="26" fill="#fff" stroke="#1d1830"/>
+<text x="4" y="66" class="sm">lip</text><text x="4" y="90" class="sm">window</text>
+<g transform="translate(40 60) rotate(20 0 0)">
+<rect x="0" y="12" width="6" height="60" class="part"/><rect x="6" y="14" width="4" height="56" fill="#1d1830"/>
+</g>
+<text x="66" y="112" class="sm">board H, glass</text><text x="66" y="123" class="sm">against the lip</text><path d="M64 110 L52 96" class="dim"/>
+<path d="M56 150 L50 130" class="arrow"/><text x="60" y="150" class="sm">slides up from below</text>
+<rect x="20" y="176" width="200" height="8" fill="#fff" stroke="#1d1830"/><rect x="44" y="164" width="30" height="12" class="part"/>
+<text x="80" y="174" class="sm">lid D bump presses the board up</text>
+<text x="120" y="66" class="sm">pocket, tilted 20°</text><path d="M118 68 L60 84" class="dim"/>
+<text x="130" y="140" class="sm">inside of plinth (hollow)</text>
+<text x="20" y="196" class="sm">front is on the left</text>
+</svg></figure></div>
+  <div class="dgrow two" style="margin-top:10pt;align-items:start"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Bottom view of the upside-down plinth: the pocket opening at the front edge, the board going in screen-toward-the-window with the USB port toward the bottom edge"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<text x="120" y="30" text-anchor="middle" class="cap">BOTTOM, PLINTH UPSIDE DOWN</text>
+<circle cx="120" cy="120" r="76" class="fill"/>
+<rect x="72" y="52" width="96" height="16" class="dark"/><text x="120" y="48" text-anchor="middle" class="sm">pocket opening (front)</text>
+<rect x="76" y="80" width="88" height="8" class="part"/><text x="120" y="104" text-anchor="middle" class="sm">board H on edge, screen ↑ to window</text>
+<path d="M120 112 L120 72" class="arrow"/>
+<rect x="76" y="84" width="10" height="4" fill="#1d1830"/><text x="60" y="126" class="sm">USB port on the left</text>
+<path d="M78 90 L84 118" class="dim"/>
+<rect x="110" y="182" width="20" height="10" fill="#fff" stroke="#1d1830"/><text x="136" y="190" class="sm">cable slot (back)</text>
+</svg></figure>
+    <div>
+      <div class="stephead"><div class="num">17</div><h3>Seat the display board</h3><span class="time">5 min</span></div>
+      <ol class="do">
+        <li>Turn plinth <b>C</b> upside down, front (window) toward you. The pocket opening is the rectangular slot just inside the front edge.</li>
+        <li>Unplug the two pigtails from board <b>H</b> so nothing snags. Hold the board on its long edge, <b>screen facing the window side</b>, <b>USB port on the left</b>.</li>
+        <li>Slide it into the pocket: light finger pressure, it stops when the glass meets the lip (same fit as step 4).</li>
+        <li>Plug the pigtails back into P1 and CN1; they hang out of the open bottom. Plug in the USB cable.</li>
+        <li>Turn the plinth right side up and check through the window: picture centred, even black margin. Turn it back over for wiring.</li>
+      </ol>
+      <div class="note"><b>Loose?</b> A folded strip of masking tape on the back of the board (never the screen) takes up slack. The bottom lid's bump (step 19) also presses the board up.</div>
+    </div>
+  </div>
+  <div class="folio"><span>Light the Beam</span><span>10</span></div>
+</section>
+
+<!-- ============================ PART 4: WIRING (page 11) ============================ -->
 <section class="page">
   <div class="eyebrow">Part 4 · Arena and plinth</div>
   <h2>Connect the strip and close it up</h2>
   <div class="step">
     <div>
       <div class="stephead"><div class="num">18</div><h3>Make the three connections (for real this time)</h3><span class="time">5 min</span></div>
-      <p style="font-size:10pt">Same three joints as the test in step 13, now with the strip inside the arena and the board inside the plinth.</p>
+      <p style="font-size:10pt">Same three joints as the bench test in step 13 (wiring reference on page 8), now with the strip inside the arena and the board inside the plinth.</p>
       <table>
         <tr><th>Board pigtail</th><th>Strip wire</th><th>Carries</th><th>Connector</th></tr>
         <tr><td><span class="wire" style="background:#d0342c"></span><b>VIN</b> (P1)</td><td><span class="wire" style="background:#d0342c"></span>Red</td><td>5 V power</td><td>J1</td></tr>
@@ -447,7 +613,23 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="warn"><b>Red goes to VIN, never to 3V3.</b> 3V3 can't supply the strip and you'll get a dim, flickering beam. <b>Green goes to IO22, not IO27.</b></div>
     </div>
-    <img class="render" src="render/wiring.png" alt="Board, three lever nuts and the strip end wired">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 230" role="img" aria-label="Section through the whole assembly: wires from the strip run down the arena's wire hole, through the slot in the plinth top plate, to the lever nuts inside the plinth; the USB cable leaves through the back slot"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M80 110 L80 40 L96 40 L96 96 L224 96 L224 40 L240 40 L240 110 Z" class="fill"/>
+<rect x="224" y="76" width="16" height="12" fill="#fff" stroke="#1d1830"/>
+<text x="84" y="34" class="sm">arena A (lid off)</text>
+<path d="M30 118 L30 200 L290 200 L290 118 Z" class="fill"/><rect x="30" y="110" width="260" height="8" fill="#e6dcf3" stroke="#1d1830"/>
+<rect x="226" y="110" width="12" height="8" fill="#fff" stroke="#5a2d81"/><text x="200" y="130" class="sm">slot in top plate</text>
+<rect x="284" y="160" width="10" height="14" fill="#fff" stroke="#1d1830"/><text x="238" y="186" class="sm">cable slot, back</text>
+<rect x="150" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/><rect x="180" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/><rect x="210" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/>
+<text x="150" y="176" class="sm">3 lever nuts J</text>
+<g transform="translate(40 128) rotate(20)"><rect x="0" y="0" width="6" height="46" class="part"/></g><text x="34" y="192" class="sm">board H</text>
+<rect x="150" y="96" width="14" height="6" class="part"/>
+<path d="M164 100 C200 100 220 84 232 82 C236 100 232 112 232 118 C232 140 210 150 200 150" stroke="#d0342c" stroke-width="1.6" fill="none"/>
+<path d="M62 150 C100 150 120 156 150 156" stroke="#d0342c" stroke-width="1.6" fill="none"/>
+<path d="M62 158 C120 170 280 176 288 167" stroke="#1d1830" stroke-width="2.4" fill="none"/><text x="120" y="216" class="sm">USB cable to the adapter</text>
+<text x="166" y="92" class="sm">strip wires from the socket</text>
+<text x="34" y="226" class="sm">plinth C, front on the left</text>
+</svg><figcaption>Strip wires: socket → wire hole → slot in the plinth top → lever nuts. Board USB cable → back slot.</figcaption></figure>
   </div>
   <div class="step">
     <div>
@@ -460,9 +642,15 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="check">Plinth lid flush, arena seated with no rocking, one cable out the back. Looking in the front window, the screen is centred and straight.</div>
     </div>
-    <img class="render" src="render/exploded.png" alt="Exploded stack" style="max-height:3in;object-fit:cover">
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 170" role="img" aria-label="The arena drops into the shallow recess in the plinth's top plate; turn it so the flat back edge is at the back"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M30 90 L30 150 L290 150 L290 90 Z" class="fill"/><path d="M30 90 L70 90 L70 94 L250 94 L250 90 L290 90" class="ln"/>
+<text x="120" y="120" class="sm">recess, 2 mm deep</text>
+<g transform="translate(0 -30)"><path d="M72 84 L72 40 L248 40 L248 84 Z" class="part"/><text x="80" y="60" class="cap">arena A</text></g>
+<path d="M100 62 L100 86" class="arrow"/><path d="M220 62 L220 86" class="arrow"/>
+<text x="120" y="164" class="sm">plinth C · flat back edge of the arena toward the plinth's cable slot</text>
+</svg></figure>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>10</span></div>
+  <div class="folio"><span>Light the Beam</span><span>11</span></div>
 </section>
 
 <!-- ============================ PART 5: SETUP (page 11) ============================ -->
@@ -478,7 +666,7 @@ pio run -e cyd_demo -t upload</pre>
       </ol>
       <div class="note"><b>Use the 2 A adapter, not a laptop port.</b> The beam at full brightness plus the board draws about 1 A; a laptop port may brown out and restart the board mid-animation.</div>
     </div>
-    <img class="render" src="render/screen.png" alt="The plinth with the screen lit">
+    <img class="render" src="render/screen.png" alt="The plinth with the screen lit" style="max-height:2.2in;object-fit:cover">
   </div>
   <div class="step full">
     <div>
@@ -490,6 +678,14 @@ pio run -e cyd_demo -t upload</pre>
         <li>Type your WiFi password carefully (it's case-sensitive; tap the eye icon to check it) and tap <b>Save</b>.</li>
         <li>The setup network disappears; your phone reconnects to your normal WiFi by itself. The board's screen shows <b>CONNECTED</b> and then, within about 10 seconds, <b>NEXT GAME</b> with the opponent and tipoff time.</li>
       </ol>
+<figure class="dg" style="margin:0"><svg viewBox="0 0 360 200" role="img" aria-label="Three phone screens: join KingsBeam-Setup in WiFi settings, tap Configure WiFi on the setup page, pick your network and enter the password"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<g transform="translate(10 0)"><rect x="0" y="8" width="100" height="184" rx="10" class="fill"/><rect x="6" y="24" width="88" height="160" rx="4" fill="#fff" stroke="#d9d5e4"/>
+<text x="50" y="40" text-anchor="middle" class="cap">WIFI SETTINGS</text><rect x="12" y="52" width="76" height="14" rx="3" fill="#efe6fa" stroke="#5a2d81"/><text x="16" y="62" class="sm">KingsBeam-Setup  ›</text><text x="16" y="84" class="sm">Home-WiFi</text><text x="16" y="100" class="sm">Neighbour-5G</text><text x="16" y="116" class="sm">CoffeeShop</text><text x="50" y="170" text-anchor="middle" class="sm">tap to join, no password</text></g>
+<g transform="translate(130 0)"><rect x="0" y="8" width="100" height="184" rx="10" class="fill"/><rect x="6" y="24" width="88" height="160" rx="4" fill="#fff" stroke="#d9d5e4"/>
+<text x="50" y="40" text-anchor="middle" class="cap">SETUP PAGE OPENS</text><text x="16" y="60" class="sm">KingsBeam-Setup</text><rect x="12" y="70" width="76" height="16" rx="3" fill="#5a2d81"/><text x="50" y="81" text-anchor="middle" style="fill:#fff;font-size:8.5px">Configure WiFi</text><rect x="12" y="92" width="76" height="14" rx="3" fill="#fff" stroke="#d9d5e4"/><text x="50" y="102" text-anchor="middle" class="sm">Info</text><text x="50" y="150" text-anchor="middle" class="sm">no page? browse to</text><text x="50" y="162" text-anchor="middle" class="sm">192.168.4.1</text></g>
+<g transform="translate(250 0)"><rect x="0" y="8" width="100" height="184" rx="10" class="fill"/><rect x="6" y="24" width="88" height="160" rx="4" fill="#fff" stroke="#d9d5e4"/>
+<text x="50" y="40" text-anchor="middle" class="cap">PICK YOUR NETWORK</text><text x="16" y="58" class="sm">Home-WiFi     ▮▮▮</text><text x="16" y="72" class="sm">Neighbour-5G  ▮▮</text><rect x="12" y="84" width="76" height="14" rx="3" fill="#fff" stroke="#8d86a3"/><text x="16" y="94" class="sm">Home-WiFi</text><rect x="12" y="104" width="76" height="14" rx="3" fill="#fff" stroke="#8d86a3"/><text x="16" y="114" class="sm">••••••••••</text><rect x="12" y="126" width="76" height="16" rx="3" fill="#5a2d81"/><text x="50" y="137" text-anchor="middle" style="fill:#fff;font-size:8.5px">Save</text><text x="50" y="166" text-anchor="middle" class="sm">2.4 GHz networks only</text></g>
+</svg><figcaption>Join the setup network, tap Configure WiFi, choose your home network, type the password, Save.</figcaption></figure>
       <div class="check">The NEXT GAME screen shows the right opponent and a sensible countdown. Time is synced from the internet, so the tipoff shown is already in Pacific time.</div>
       <div class="warn"><b>Wrong password?</b> The board tries for 20 seconds, then opens KingsBeam-Setup again. Just repeat from step 1. <b>iPhone won't show the setup page?</b> Turn off cellular data for a minute so the phone stays on the setup network, or use the address above.</div>
     </div>
@@ -504,7 +700,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="check">Beam rises evenly with no dark LEDs. You're done. It will light itself the next time the Kings win.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>11</span></div>
+  <div class="folio"><span>Light the Beam</span><span>12</span></div>
 </section>
 
 <!-- ============================ USING IT (page 12) ============================ -->
@@ -540,7 +736,7 @@ pio run -e cyd_demo -t upload</pre>
       <p class="muted" style="font-size:9.6pt">Dust with a dry cloth. Keep out of direct sun and off radiators: PLA softens around 55 °C and the tube is thin. The lid lifts off to reach the beam; the bottom lid pulls off (finger hole) to reach the board. Unplug before opening.</p>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>12</span></div>
+  <div class="folio"><span>Light the Beam</span><span>13</span></div>
 </section>
 
 <!-- ============================ TROUBLESHOOTING + SPECS (page 13) ============================ -->
@@ -582,7 +778,7 @@ pio run -e cyd_demo -t upload</pre>
       <p class="muted" style="font-size:9.6pt">Everything referenced here lives in the project repo: <code>firmware/</code> (build and flash), <code>models/</code> (OpenSCAD and STL exports), <code>docs/bom.md</code> (parts with links), <code>tools/</code> (helper scripts).</p>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>13</span></div>
+  <div class="folio"><span>Light the Beam</span><span>14</span></div>
 </section>
 </body>
 </html>
