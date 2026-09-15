@@ -37,11 +37,38 @@ app-controlled light bar, and the arena sits on a new printed plinth that holds 
 
 ## Quick start
 
-1. Buy the parts in `docs/bom.md` (about $41–50 shipped to SF, filament separate).
-2. Print: arena base + lid (220 mm) from Printables, plus `models/exports/*.stl`.
-3. Flash: `cd firmware && pio run -t upload`, then join the `KingsBeam-Setup` WiFi network
-   from your phone and enter your home WiFi.
-4. Wire the strip to the board with three WAGO 221-413 lever nuts (see `docs/bom.md`).
+1. **Buy** the parts in [`docs/bom.md`](docs/bom.md): about $41 with tax, filament separate.
+2. **Flash** the board (PlatformIO; `pip3 install --user platformio` if you don't have it):
+   ```
+   cd firmware
+   pio run -e cyd -t upload          # real firmware
+   pio run -e cyd_demo -t upload     # demo: cycles NEXT → LIVE → FINAL, no WiFi needed
+   pio device monitor -b 115200      # logs
+   ```
+   On first boot join the `KingsBeam-Setup` WiFi network from your phone and pick your home
+   WiFi. The board remembers it.
+3. **Print**: download the 220 mm arena base and no-hole lid from Printables into
+   `models/printables/` (see the README there), measure the base, then `cd models && make`
+   to export the plinth, beam tube, spine and socket. Print the `plinth_test.stl` slice first.
+4. **Wire** the strip to the board with three WAGO 221-413 lever nuts (diagram in
+   `docs/bom.md`). Board VIN → strip 5V, GND → GND, GPIO 22 → DIN.
+
+Overview document: [`docs/kings-beam-overview.pdf`](docs/kings-beam-overview.pdf).
+
+## Developing
+
+```
+cd firmware
+pio test -e native                 # parser tests against real ESPN fixtures
+python3 ../tools/espn_probe.py     # what the board will see right now
+python3 ../tools/make_fixtures.py  # refresh live/post fixtures from last season's games
+python3 ../tools/make_fonts.py     # regenerate LVGL fonts from tools/fonts/*.ttf (needs Pillow)
+python3 ../tools/make_logos.py     # regenerate team logos + colors from ESPN
+```
+
+Board notes: the ESP32-2432S028R comes in two variants. If colors look inverted, switch the
+TFT driver flags in `firmware/platformio.ini` (comment there). If the screen is upside down,
+change `LV_DISPLAY_ROTATION_90` to `_270` in `firmware/src/ui.cpp`.
 
 ## Data source
 
@@ -53,4 +80,10 @@ a browser UA.
 
 ## Status
 
-Work in progress. See `docs/` for the plan and BOM.
+- Firmware builds (`cyd` and `cyd_demo`), parser tested against real fixtures. Not yet run on
+  hardware: display rotation, touch threshold and the first-LED data level are the things most
+  likely to need a tweak.
+- Models are parametric OpenSCAD; `arena_d` and the wire-hole angle must be measured from the
+  downloaded arena STL before printing the plinth body.
+- Preseason opener is Oct 5, 2026 (LAL @ SAC); the live and final screens get their first
+  real data then. `tools/make_fixtures.py` already exercised them with last season's games.
