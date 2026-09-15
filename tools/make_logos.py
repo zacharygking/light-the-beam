@@ -26,7 +26,12 @@ LV_IMAGE_HEADER_MAGIC = 0x19
 LV_COLOR_FORMAT_RGB565A8 = 0x14
 
 
+OFFLINE = False
+
+
 def get(url: str) -> bytes:
+    if OFFLINE:
+        raise SystemExit(f"--offline: would need to download {url}")
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.read()
@@ -84,7 +89,10 @@ def c_array(data: bytes, per_line=24):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--size", type=int, default=56)
+    ap.add_argument("--offline", action="store_true", help="never touch the network; fail if a cached file is missing")
     args = ap.parse_args()
+    global OFFLINE
+    OFFLINE = args.offline
     size = args.size
 
     teams = load_teams()

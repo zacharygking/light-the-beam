@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  firmware:
+    name: Firmware · native tests + ESP32 builds
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            firmware/.pio
+          key: pio-${{ runner.os }}-${{ hashFiles('firmware/platformio.ini') }}
+      - run: pip install platformio
+      - name: Parser tests (host)
+        run: pio test -e native
+        working-directory: firmware
+      - name: Build firmware
+        run: pio run -e cyd -e cyd_demo
+        working-directory: firmware
+      - name: Report size
+        run: pio run -e cyd -t size 2>/dev/null | grep -E "RAM:|Flash:" || true
+        working-directory: firmware
+
+  tools:
+    name: Tools · Python checks + generators
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+      - name: Compile all scripts
+        run: python3 -m py_compile tools/*.py
+      - name: Fixtures parse with the reference parser
+        run: python3 tools/check_fixtures.py
+      - name: Fonts regenerate identically
+        run: |
+          python3 tools/make_fonts.py
+          git diff --exit-code -- firmware/src/fonts
+      - name: Logo header is in sync with the team list
+        run: |
+          python3 tools/make_logos.py --offline
+          git diff --exit-code --stat -- firmware/src/logos.h
+
+  models:
+    name: Models · OpenSCAD export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update && sudo apt-get install -y openscad
+      - name: Export every part
+        run: make OPENSCAD=openscad
+        working-directory: models
+      - name: Parts are non-empty
+        run: |
+          for f in models/exports/*.stl; do
+            [ -s "$f" ] || { echo "empty $f"; exit 1; }
+            echo "$(stat -c%s "$f") bytes  $f"
+          done

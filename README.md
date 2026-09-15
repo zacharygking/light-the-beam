@@ -1,102 +1,90 @@
-# Light the Beam — Golden 1 Center with a live Kings scoreboard
+# Light the Beam
 
-A 3D-printed Golden 1 Center that lights its purple beam when the Sacramento Kings win, with
-a 2.8" screen on the base showing the next game or the live score.
+A 3D-printed Golden 1 Center that lights its purple beam when the Sacramento Kings win, with a live scoreboard in the base.
 
-Based on Dave Lack's free model, [Golden 1 Center – Light The Beam](https://www.printables.com/model/338758-golden-1-center-light-the-beam),
-with two changes: the beam is an addressable LED strip driven by an ESP32 instead of an
-app-controlled light bar, and the arena sits on a new printed plinth that holds the display.
+[![CI](https://github.com/zacharygking/light-the-beam/actions/workflows/ci.yml/badge.svg)](https://github.com/zacharygking/light-the-beam/actions/workflows/ci.yml)
 
-```
-        ___________
-       /  ARENA    \      stock 220 mm print, purple LED beam rising from the roof
-      |   .:BEAM:.  |
-       \___________/
-  ____________________________
- |  [SAC 102 · LAL 98  Q4 2:31] |   2.8" screen in the plinth, one USB cable
- |____________________________|
-```
+![The finished piece: the arena on its plinth, purple beam rising, live score on the screen](docs/render/hero.png)
+
+The arena is [Dave Lack's free Printables model](https://www.printables.com/model/338758-golden-1-center-light-the-beam), printed unmodified. Everything else is this repo: a printed plinth with a sloped console that holds a 2.8" ESP32 touch display, a 15-LED beam in a single-wall diffuser tube, firmware that reads ESPN's public scores over WiFi, and the documents to build it without soldering.
 
 ## What it does
 
-- **Next game**: opponent logo, home/away, tipoff in Pacific time, countdown.
-- **Live**: score, quarter and clock, refreshed every 20 s from ESPN's public API (no key).
-- **Final**: if the Kings win, the beam rises from the base and holds purple. "LIGHT THE BEAM."
-- Tap the screen to light the beam yourself. Long-press cycles brightness.
-- Dims at night. WiFi is set up from your phone the first time it boots.
-- Solder-free: three lever-nut connections.
+![The three screens: next game with logos and countdown, live score with clock, and the final screen that says Light the Beam](docs/render/screens.png)
 
-## Repo layout
+| | |
+|---|---|
+| **Next game** | Opponent logo, home or away, tipoff in Pacific time, countdown. Polled every 10 minutes, every 30 seconds near tipoff. |
+| **Live** | Score, quarter and clock every 20 seconds. Leader in white, trailer in grey. Halftime and overtime are labelled; scores animate when they change. |
+| **Final** | If the Kings win, the beam rises from the base like the real one and holds purple for up to 12 hours. |
+| **Touch** | Tap to light the beam yourself. Hold for a second to step brightness. |
+| **Setup** | First boot opens a `KingsBeam-Setup` WiFi network; join it from a phone and pick your home WiFi. Nothing is typed into code. |
+| **Night** | Screen dims 11 pm to 7 am and whenever the room is dark. |
+
+## How it's built
+
+![Exploded view: beam tube with the strip on its spine, arena lid, arena base with the tube socket, plinth with the display board, bottom lid](docs/render/exploded.png)
+
+- **Plinth** ([`models/plinth.scad`](models/plinth.scad)): a 230 mm drum, 56 mm tall, with a console on the front whose face leans back 20° so the screen points at you at a desk. The recess on top is cut to the arena's measured footprint, so it only fits one way, and a slot sits under the arena's own wire channel. The board slides into the console from below; the bottom lid holds it.
+- **Beam** ([`models/beam_tube.scad`](models/beam_tube.scad), [`models/strip_holder.scad`](models/strip_holder.scad)): a 250 mm tube printed in vase mode from white PLA, with the WS2812B strip on a printed spine inside and a socket glued in the arena's well.
+- **Board**: ESP32-2432S028R, the "Cheap Yellow Display". Three lever-nut connections to the strip: 5 V, ground, data on GPIO 22.
+- **Firmware** ([`firmware/`](firmware/)): PlatformIO, Arduino framework. LVGL 9 UI with Barlow Condensed fonts and all 30 team logos baked in, FastLED for the beam, WiFiManager for the captive portal, ArduinoJson with a filter for the 21 KB ESPN response. A `cyd_demo` build cycles the three screens without WiFi.
+
+![Cutaway of the plinth: the display board leaning back in the console, lever nuts inside](docs/render/cutaway.png)
+
+## Documents
+
+| | |
+|---|---|
+| [**Build guide** (PDF)](docs/kings-beam-assembly.pdf) | 15 pages, 22 steps with diagrams: print, flash, beam, arena and plinth, WiFi setup, troubleshooting. |
+| [**Overview** (PDF)](docs/kings-beam-overview.pdf) | What it is and how it works, in five pages. |
+| [**Shopping list** (PDF)](docs/kings-beam-shopping-list.pdf) · [HTML](docs/shopping-list.html) | Four hardware items in one Amazon cart link, filament, free downloads, local pickup in San Francisco. |
+| [**Bill of materials**](docs/bom.md) | Sourcing notes, alternatives, prices with tax, wiring table. |
+
+Hardware is about **$41 with tax**, everything bought new; filament is separate.
+
+## Building it yourself
+
+```sh
+# Firmware (PlatformIO; `pip3 install --user platformio` if you don't have it)
+cd firmware
+pio test -e native                 # parser tests against captured ESPN responses
+pio run -e cyd_demo -t upload      # demo build first: cycles NEXT → LIVE → FINAL, no WiFi
+pio run -e cyd -t upload           # the real thing
+pio device monitor -b 115200
+
+# Models (OpenSCAD 2021.01 or newer)
+python3 tools/measure_arena.py     # reads the downloaded arena STL, writes the footprint outline
+cd models && make                  # exports plinth, lid, console test part, tube, spine, socket
+
+# Everything at once
+tools/validate.sh                  # tests, both firmware builds, exports, PDFs, link check
+```
+
+Print the console test part (`plinth_test.stl`, about 40 minutes) before the full plinth to confirm the board fit. The [build guide](docs/kings-beam-assembly.pdf) has the rest.
+
+## Repository
 
 | Path | What |
 |---|---|
-| `firmware/` | PlatformIO project for the ESP32-2432S028R board (LVGL UI, FastLED beam) |
-| `models/` | OpenSCAD sources for the plinth, beam tube and strip spine; `printables/` is where the downloaded arena STLs go |
-| `tools/` | `espn_probe.py` (check the API), `make_fixtures.py` (test data), `make_logos.py` (team logos → C header) |
-| `docs/` | Bill of materials, the overview PDF, the assembly guide PDF, and `render/` (three.js scene + rendered views) |
+| `firmware/` | PlatformIO project: `src/` (UI, beam, touch, network, parser), `include/lv_conf.h`, `test/` (native Unity tests + real ESPN fixtures) |
+| `models/` | OpenSCAD sources, `exports/` STLs, `printables/` for the downloaded arena files, `arena_outline.scad` (measured footprint) |
+| `tools/` | `espn_probe.py`, `make_fixtures.py`, `make_fonts.py` (TTF → LVGL, no Node needed), `make_logos.py`, `measure_arena.py`, `render_views.sh`, `validate.sh` |
+| `docs/` | Guides and BOM, `render/` (three.js scene that renders every view through headless Chrome) |
+| `.github/workflows/ci.yml` | Native tests, both ESP32 builds, generator reproducibility, OpenSCAD export |
 
-## Quick start
+## Notes from building it
 
-1. **Buy** the parts in [`docs/bom.md`](docs/bom.md): about $41 with tax, filament separate.
-2. **Flash** the board (PlatformIO; `pip3 install --user platformio` if you don't have it):
-   ```
-   cd firmware
-   pio run -e cyd -t upload          # real firmware
-   pio run -e cyd_demo -t upload     # demo: cycles NEXT → LIVE → FINAL, no WiFi needed
-   pio device monitor -b 115200      # logs
-   ```
-   On first boot join the `KingsBeam-Setup` WiFi network from your phone and pick your home
-   WiFi. The board remembers it.
-3. **Print**: download the 220 mm arena base and no-hole lid from Printables into
-   `models/printables/` as `base_220.stl` and `lid_220_nohole.stl`, run
-   `python3 tools/measure_arena.py` (writes the footprint outline the plinth recess is cut
-   to), then `cd models && make` to export the plinth, beam tube, spine and socket. Print
-   `plinth_test.stl` (the console alone) first to check the board fit.
-4. **Wire** the strip to the board with three WAGO 221-413 lever nuts (diagram in
-   `docs/bom.md`). Board VIN → strip 5V, GND → GND, GPIO 22 → DIN.
-
-Documents: [`docs/kings-beam-overview.pdf`](docs/kings-beam-overview.pdf) (what it is) and
-[`docs/kings-beam-assembly.pdf`](docs/kings-beam-assembly.pdf) (step-by-step build guide).
-
-## Developing
-
-```
-cd firmware
-pio test -e native                 # parser tests against real ESPN fixtures
-python3 ../tools/espn_probe.py     # what the board will see right now
-python3 ../tools/make_fixtures.py  # refresh live/post fixtures from last season's games
-python3 ../tools/make_fonts.py     # regenerate LVGL fonts from tools/fonts/*.ttf (needs Pillow)
-python3 ../tools/make_logos.py     # regenerate team logos + colors from ESPN
-python3 ../tools/measure_arena.py  # measure the downloaded arena STL, write models/arena_outline.scad
-../tools/render_views.sh           # re-render docs/render/*.png from the three.js scene (headless Chrome)
-```
-
-The PDFs are printed from `docs/overview.html` and `docs/assembly.html` with headless Chrome:
-
-```
-cd docs && "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --headless=new \
-  --no-pdf-header-footer --virtual-time-budget=10000 --print-to-pdf="$PWD/kings-beam-assembly.pdf" "file://$PWD/assembly.html"
-```
-
-Board notes: the ESP32-2432S028R comes in two variants. If colors look inverted, switch the
-TFT driver flags in `firmware/platformio.ini` (comment there). If the screen is upside down,
-change `LV_DISPLAY_ROTATION_90` to `_270` in `firmware/src/ui.cpp`.
-
-## Data source
-
-`https://site.api.espn.com/apis/site/v2/sports/basketball/nba/teams/sac` → `team.nextEvent[0]`
-carries the next or in-progress game, its status, scores and winner. One gotcha found while
-building this: ESPN's edge returns **403 to browser-looking user agents sent by non-browser
-clients**. The stock `ESP32HTTPClient` and `python-urllib` user agents work; do not spoof
-a browser UA.
+- **ESPN's edge returns 403 to browser-looking user agents from non-browser clients.** The stock `ESP32HTTPClient` and `python-urllib` user agents pass. The firmware never spoofs a browser.
+- ESPN's document nests 14 levels deep; ArduinoJson's default limit is 10. With a filter, ArduinoJson also reports success on non-JSON input, so the parser checks for the team object explicitly.
+- The team endpoint omits opponent colours for upcoming games, so team colours ship with the logos.
+- Fonts are converted from TTF to LVGL's bitmap format with a 150-line Python script, which keeps Node out of the toolchain.
+- The renders are a three.js scene rasterised by headless Chrome's software WebGL. Once the Printables STL was downloaded, the scene loads the real mesh, and the same slicer measured the arena for the plinth.
 
 ## Status
 
-- Firmware builds (`cyd` and `cyd_demo`), parser tested against real fixtures. Not yet run on
-  hardware: display rotation, touch threshold and the first-LED data level are the things most
-  likely to need a tweak.
-- Models are parametric OpenSCAD, exported and previewed with OpenSCAD 2021.01. The plinth recess is
-  cut to the measured arena footprint (`tools/measure_arena.py`); the wire slot sits under the
-  arena's built-in channel exit at the back right.
-- Preseason opener is Oct 5, 2026 (LAL @ SAC); the live and final screens get their first
-  real data then. `tools/make_fixtures.py` already exercised them with last season's games.
+Firmware builds and the parser is tested against real responses, but nothing has run on hardware yet. The three things most likely to need a tweak on first flash are display rotation, the touch pressure threshold, and the first LED's data level. The preseason opener is October 5, 2026 (LAL @ SAC); the live and final screens get their first real data then.
+
+## Credits
+
+Arena model by [Dave Lack](https://www.printables.com/@DaveLack_475585) on Printables. Scores from ESPN's public API. Team logos are NBA/ESPN property, embedded for personal use. Barlow Condensed by Jeremy Tribby, SIL Open Font License. Built with [PlatformIO](https://platformio.org), [LVGL](https://lvgl.io), [FastLED](https://fastled.io), [ArduinoJson](https://arduinojson.org), [WiFiManager](https://github.com/tzapu/WiFiManager), [OpenSCAD](https://openscad.org) and [three.js](https://threejs.org).

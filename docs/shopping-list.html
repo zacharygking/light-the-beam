@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Light the Beam · Shopping List</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap">
+<style>
+  :root { --purple:#5a2d81; --lav:#b48ae6; --ink:#1d1830; --muted:#6b6482; --line:#d9d5e4; --paper:#fff; --tint:#f4f2f8; --ok:#2f7d4f; --amz:#f0a030; }
+  @page { size: letter; margin: 0.55in; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--tint); color: var(--ink); font-family: Barlow, "Helvetica Neue", Arial, sans-serif; font-size: 10.5pt; line-height: 1.45; }
+  .wrap { max-width: 7.6in; margin: 0 auto; background: var(--paper); padding: 0.5in 0.55in 0.6in; }
+  @media screen { .wrap { margin: 24px auto; box-shadow: 0 2px 20px rgba(0,0,0,.08); border-radius: 6px; } }
+  @media print { body { background: #fff; } .wrap { padding: 0; max-width: none; } }
+  h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; margin: 0; line-height: 1; }
+  h1 { font-weight: 800; font-size: 40pt; }
+  h2 { font-weight: 700; font-size: 20pt; margin: 22pt 0 8pt; }
+  .eyebrow { font-size: 8pt; letter-spacing: .16em; text-transform: uppercase; font-weight: 600; color: var(--purple); }
+  .lede { color: var(--muted); max-width: 60ch; margin: 6pt 0 0; }
+  .cta { display: flex; gap: 12pt; align-items: center; margin: 16pt 0 4pt; flex-wrap: wrap; }
+  .btn { display: inline-block; background: var(--purple); color: #fff; text-decoration: none; font-family: "Barlow Condensed", sans-serif; font-weight: 700; font-size: 15pt; padding: 8pt 16pt; border-radius: 4px; }
+  .btn.amz { background: var(--amz); color: #1d1830; }
+  .cta .sm { font-size: 9pt; color: var(--muted); max-width: 40ch; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 6pt 6pt; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: 7.5pt; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  td .name { font-weight: 600; }
+  td .spec { color: var(--muted); font-size: 9.5pt; display: block; }
+  a { color: var(--purple); }
+  .pill { display: inline-block; font-size: 7.5pt; letter-spacing: .08em; text-transform: uppercase; font-weight: 600; padding: 1pt 6pt; border-radius: 3px; background: var(--tint); color: var(--muted); margin-left: 4pt; vertical-align: 1pt; }
+  .pill.ok { background: #eef7f1; color: var(--ok); }
+  .total td { border-bottom: none; border-top: 2px solid var(--ink); font-family: "Barlow Condensed", sans-serif; font-size: 15pt; font-weight: 700; padding-top: 8pt; }
+  .note { background: var(--tint); border-left: 3px solid var(--lav); padding: 6pt 10pt; font-size: 9.5pt; margin-top: 8pt; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16pt; }
+  @media (max-width: 600px) { .two { grid-template-columns: 1fr; } .wrap { padding: 20px 16px; } h1 { font-size: 30pt; } }
+  .check { list-style: none; padding: 0; margin: 0; }
+  .check li { padding: 3pt 0 3pt 20pt; position: relative; }
+  .check li::before { content: ""; position: absolute; left: 0; top: 5pt; width: 10pt; height: 10pt; border: 1.5px solid var(--purple); border-radius: 2px; }
+  .foot { margin-top: 20pt; padding-top: 8pt; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--muted); display: flex; justify-content: space-between; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Light the Beam · Sacramento Kings desk model</div>
+  <h1>SHOPPING LIST</h1>
+  <p class="lede">Everything to build one, with links. Four hardware items in one Amazon cart, filament from wherever you buy it, and the free arena files. Prices are September 2026 and change; the tax line assumes San Francisco (8.625 %).</p>
+
+  <div class="cta">
+    <a class="btn amz" href="https://www.amazon.com/gp/aws/cart/add.html?ASIN.1=B0FCXDVBVZ&amp;Quantity.1=1&amp;ASIN.2=B01CDTED80&amp;Quantity.2=1&amp;ASIN.3=B06XGYXVXR&amp;Quantity.3=1&amp;ASIN.4=B0773J79KC&amp;Quantity.4=1">Add all 4 hardware items to Amazon cart</a>
+    <span class="sm">Opens Amazon with the four items below added. If Amazon shows an error, use the individual links; they're the same products.</span>
+  </div>
+
+  <h2>Hardware · one Amazon order</h2>
+  <table>
+    <tr><th>#</th><th>Item</th><th>Where</th><th class="num">Price</th></tr>
+    <tr><td>1</td><td><span class="name">ESP32 display board, ESP32-2432S028R</span><span class="spec">2.8" touch screen "Cheap Yellow Display". Comes with the USB cable and the pigtail leads. Get the single-pack.</span></td><td><a href="https://www.amazon.com/dp/B0FCXDVBVZ">Amazon B0FCXDVBVZ</a></td><td class="num">~$14</td></tr>
+    <tr><td>2</td><td><span class="name">WS2812B LED strip, 5 V, 60 LEDs/m, 1 m</span><span class="spec">BTF-LIGHTING, IP30 (no silicone sleeve), black PCB. You use 15 LEDs; the rest is spare.</span></td><td><a href="https://www.amazon.com/dp/B01CDTED80">Amazon B01CDTED80</a></td><td class="num">~$9</td></tr>
+    <tr><td>3</td><td><span class="name">WAGO 221-413 lever nuts, 10-pack</span><span class="spec">3-conductor, 24–12 AWG. You use 3. Also at Lowe's / Home Depot in the electrical aisle.</span></td><td><a href="https://www.amazon.com/dp/B06XGYXVXR">Amazon B06XGYXVXR</a></td><td class="num">~$8</td></tr>
+    <tr><td>4</td><td><span class="name">USB wall charger, 12 W (5 V 2.4 A)</span><span class="spec">Amazon Basics one-port USB-A. Any 5 V 2 A+ charger works; the board's cable is USB-A → micro-USB.</span></td><td><a href="https://www.amazon.com/dp/B0773J79KC">Amazon B0773J79KC</a></td><td class="num">~$7</td></tr>
+    <tr><td></td><td class="spec" style="color:var(--muted)">Sales tax, San Francisco 8.625 %</td><td></td><td class="num">~$3.30</td></tr>
+    <tr class="total"><td></td><td>Hardware total</td><td></td><td class="num">≈ $41</td></tr>
+  </table>
+  <div class="note"><b>Already have a 5 V 2 A phone charger and some lever nuts?</b> Then it's just the board and the strip: about $25 with tax.</div>
+
+  <h2>Filament · Bambu Lab P1S</h2>
+  <table>
+    <tr><th>Item</th><th>Used for</th><th>Where</th><th class="num">Price</th></tr>
+    <tr><td><span class="name">Bambu PLA Basic, Silver, 1 kg</span><span class="spec">with spool $18.99 · refill $15.99 <span class="pill ok">price read from store</span></span></td><td>arena base, lid, plinth, plinth lid (~450 g)</td><td><a href="https://us.store.bambulab.com/products/pla-basic-filament">Bambu US store</a></td><td class="num">$18.99</td></tr>
+    <tr><td><span class="name">White PLA, any brand, 1 kg</span><span class="spec">Bambu PLA Basic White refill $15.99, or ELEGOO / SUNLU ~$13, or Bambu Jade White at Best Buy today $22.99</span></td><td>beam tube (single-wall vase print), spine, socket (~40 g)</td><td><a href="https://www.amazon.com/s?k=white+pla+filament+1kg">Amazon</a> · Bambu store · Best Buy</td><td class="num">$13–23</td></tr>
+    <tr><td><span class="name">One-spool option</span><span class="spec">Print everything in white and skip the silver.</span></td><td>all parts</td><td></td><td class="num">$13–19</td></tr>
+  </table>
+
+  <h2>Free downloads</h2>
+  <table>
+    <tr><th>Item</th><th>Note</th><th>Where</th></tr>
+    <tr><td><span class="name">Golden 1 Center arena files by Dave Lack</span><span class="spec">220 mm base + 220 mm no-hole lid</span></td><td>Free Printables account needed to download</td><td><a href="https://www.printables.com/model/338758-golden-1-center-light-the-beam">printables.com/model/338758</a></td></tr>
+    <tr><td><span class="name">This project's firmware, plinth and beam parts</span><span class="spec">OpenSCAD sources, STL exports, PlatformIO firmware, build guide</span></td><td>Open source</td><td><a href="https://github.com/zacharygking/light-the-beam">github.com/zacharygking/light-the-beam</a></td></tr>
+  </table>
+
+  <div class="two">
+    <div>
+      <h2>Optional</h2>
+      <table>
+        <tr><th>Item</th><th>Why</th><th class="num">Price</th></tr>
+        <tr><td><a href="https://www.amazon.com/dp/B08HS6X44P">USB-C panel-mount jack, 1 ft</a></td><td>Clean USB-C socket on the plinth's back instead of a cable slot</td><td class="num">~$9</td></tr>
+        <tr><td><a href="https://www.adafruit.com/product/1787">74AHCT125 level shifter</a><span class="spec">Adafruit 1787 <span class="pill ok">price read</span></span></td><td>Only if the first LED flickers</td><td class="num">$1.50</td></tr>
+        <tr><td><a href="https://www.amazon.com/dp/B0GX5X7BH6">Display board 2-pack</a></td><td>A spare board for the next project, ~$5 more than one</td><td class="num">~$20</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>Tools on hand</h2>
+      <ul class="check">
+        <li>Scissors or flush cutters</li>
+        <li>Hot glue gun (or super glue)</li>
+        <li>Ruler or calipers</li>
+        <li>Masking tape and a pencil</li>
+        <li>Isopropyl alcohol wipe</li>
+        <li>Phone (WiFi setup) and a computer with USB (flashing, once)</li>
+      </ul>
+      <p class="note" style="margin-top:10pt"><b>No soldering iron needed.</b> The three connections are lever nuts.</p>
+    </div>
+  </div>
+
+  <h2>Local pickup near Bayview, San Francisco</h2>
+  <table>
+    <tr><th>Store</th><th>Get</th><th>Note</th></tr>
+    <tr><td><span class="name">Lowe's</span><span class="spec">491 Bayshore Blvd · Mon–Sat 6a–10p, Sun 7a–8p</span></td><td>WAGO 221-413, USB charger</td><td>Ask for the 221-413 (24–12 AWG); the site lists the bigger 221-613</td></tr>
+    <tr><td><span class="name">Best Buy</span><span class="spec">1717 Harrison St</span></td><td>Insignia 12 W USB charger (~$13), Bambu PLA Basic ($22.99–24.99)</td><td>In-store pickup; White, Gray and Black usually stocked</td></tr>
+    <tr><td><span class="name">Home Depot Colma II</span><span class="spec">2 Colma Blvd</span></td><td>WAGO 221-413 10-pack</td><td>Backup for Lowe's</td></tr>
+  </table>
+  <p class="note">The display board isn't stocked in any Bay Area store (Micro Center in Santa Clara carries different WaveShare boards that need other firmware). Order it on Amazon; Prime same-day / next-day covers SF.</p>
+
+  <div class="foot"><span>Light the Beam · shopping list</span><span>Verified prices marked; others are September 2026 estimates. Full sourcing notes in docs/bom.md.</span></div>
+</div>
+</body>
+</html>
