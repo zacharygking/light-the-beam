@@ -100,8 +100,10 @@ function makePlinth({ cutaway = false } = {}) {
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial()); screen.position.z = 3.05; win.add(screen);
   g.add(win);
   // cable out the back
-  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 12, -110), new THREE.Vector3(0, 8, -150), new THREE.Vector3(30, 2, -210), new THREE.Vector3(120, 1.5, -260)]);
-  g.add(mesh(new THREE.TubeGeometry(path, 32, 2, 12), M.black));
+  // USB cable: leaves the back slot low, droops to the table, and trails away in a lazy curve
+  const path = new THREE.CatmullRomCurve3([new THREE.Vector3(0, 6, -112), new THREE.Vector3(0, 3, -128), new THREE.Vector3(-14, 2.2, -150), new THREE.Vector3(-40, 2.2, -175), new THREE.Vector3(-90, 2.2, -190), new THREE.Vector3(-170, 2.2, -180)]);
+  const cable = mesh(new THREE.TubeGeometry(path, 64, 2.2, 12), M.black); g.add(cable);
+  const plug = mesh(new THREE.BoxGeometry(6, 5, 10), M.black); plug.position.set(0, 6, -116); g.add(plug);
   return g;
 }
 
