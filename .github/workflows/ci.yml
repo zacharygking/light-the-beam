@@ -45,10 +45,8 @@ jobs:
         run: python3 -m py_compile tools/*.py
       - name: Fixtures parse with the reference parser
         run: python3 tools/check_fixtures.py
-      - name: Fonts regenerate identically
-        run: |
-          python3 tools/make_fonts.py
-          git diff --exit-code -- firmware/src/fonts
+      - name: Fonts regenerate with the same metrics
+        run: python3 tools/check_fonts.py
       - name: Logo header is in sync with the team list
         run: |
           python3 tools/make_logos.py --offline

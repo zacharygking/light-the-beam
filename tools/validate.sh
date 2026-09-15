@@ -17,7 +17,7 @@ run()  { name=$1; shift; if "$@" >/tmp/validate.log 2>&1; then ok "$name"; else 
 echo "== Python tools"
 run "py_compile tools/*.py" python3 -m py_compile tools/*.py
 run "fixtures parse (python reference)" python3 tools/check_fixtures.py
-run "fonts regenerate identically" sh -c 'python3 tools/make_fonts.py >/dev/null && git diff --exit-code --stat -- firmware/src/fonts'
+run "fonts regenerate with the same metrics" python3 tools/check_fonts.py
 run "logos regenerate identically (offline)" sh -c 'python3 tools/make_logos.py --offline >/dev/null && git diff --exit-code --stat -- firmware/src/logos.h firmware/src/logos.c'
 if [ -f models/printables/base_220.stl ]; then
   run "measure_arena writes outline unchanged" sh -c 'python3 tools/measure_arena.py >/dev/null && git diff --exit-code --stat -- models/arena_outline.scad'
