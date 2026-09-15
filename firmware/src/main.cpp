@@ -12,6 +12,7 @@
 #include "beam_policy.h"
 #include "kings_api.h"
 #include "ui.h"
+#include "winprob_train.h"
 #include "beam.h"
 #include "touch.h"
 
@@ -163,6 +164,29 @@ static void openPortal() {
 #endif
 
 // ---- arduino -----------------------------------------------------------------
+// The binned 2024-25 play-by-play table linked into the image (platformio.ini embed_files).
+extern const uint8_t winprobTableStart[] asm("_binary_data_winprob_train_bin_start");
+extern const uint8_t winprobTableEnd[]   asm("_binary_data_winprob_train_bin_end");
+// Coefficients in use: refit on boot from the table, else the compiled Python fit.
+kings::WinProbCoef winprobCoef = kings::WINPROB_COMPILED;
+
+static void trainWinProbOnBoot() {
+  kings::WinProbFit fit;
+  uint32_t t0 = millis();
+  bool ok = kings::winProbTrain(winprobTableStart, winprobTableEnd - winprobTableStart, WINPROB_EPS, fit);
+  uint32_t ms = millis() - t0;
+  if (!ok) { log_w("win-prob refit failed, using compiled coefficients"); return; }
+  winprobCoef = fit.coef;
+  log_i("win-prob refit: %u plays in %u cells, %d iterations, %u ms: a=%.5f b_ms=%.5f b_s=%.5f b_m=%.5f (compiled %.5f %.5f %.5f %.5f)",
+        fit.plays, fit.cells, fit.iterations, ms, fit.coef.a, fit.coef.b_ms, fit.coef.b_s, fit.coef.b_m,
+        WINPROB_A, WINPROB_B_MS, WINPROB_B_S, WINPROB_B_M);
+  char msg[48];
+  snprintf(msg, sizeof msg, "TRAINED ON %u PLAYS IN %u MS", fit.plays, ms);
+  ui_show_boot(msg);
+  ui_flush();
+  delay(1500);   // long enough to read; the flex is the point
+}
+
 void setup() {
   Serial.begin(115200);
   delay(100);
@@ -174,6 +198,7 @@ void setup() {
   ui_init();
   ui_show_boot("STARTING");
   ui_flush();
+  trainWinProbOnBoot();
   beam_init();
   touch_init();
   touch_set_tap(onTap);

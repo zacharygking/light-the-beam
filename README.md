@@ -97,7 +97,9 @@ A four-coefficient logistic model of the home team's chance to win from the scor
 
 The gap to ESPN is pregame information (team strength, possession): three Brier points in the first quarter, one thousandth by the fourth. Details, calibration table and next steps are in [docs/winprob.md](docs/winprob.md).
 
-The bench is C++: `firmware/src/winprob.h` is the exact function the ESP32 will run, and `pio test -e native -f test_winprob` checks it against the Python trainer on 300 sampled plays, checks its shape (symmetry, monotonicity, end points), and replays all 641,199 held-out plays through it, asserting the Brier, fourth-quarter and calibration numbers above. It runs in CI. Data comes from `tools/fetch_pbp.py` (see [data/README.md](data/README.md)); `tools/train_winprob.py` refits and regenerates the header, fixtures and report. Not wired to the screen yet; that is a pill under the live score once the hardware is up.
+**The board trains itself.** The training plays are binned to 35,221 (margin, 5-second) cells with win/loss counts, a 247 KB table embedded in the firmware image. On boot the ESP32 refits the model from that table with `firmware/src/winprob_train.h`, a header-only Newton-Raphson trainer, and shows "TRAINED ON 623,853 PLAYS IN … MS" on the splash screen. It takes 23 ms on a laptop; the board's single-precision FPU should land well under a second.
+
+**The bench is C++.** `firmware/src/winprob.h` is the exact function the ESP32 runs, and `pio test -e native` checks it against the Python trainer on 300 sampled plays, checks its shape (symmetry, monotonicity, end points), replays all 641,199 held-out plays through it asserting the Brier, fourth-quarter and calibration numbers above, and refits with the on-device trainer to confirm it reproduces the Python coefficients. It runs in CI. Data comes from `tools/fetch_pbp.py` (see [data/README.md](data/README.md)); `tools/train_winprob.py` refreshes the table, header, fixtures and report. Not wired to the live screen yet; that is a pill under the score once the hardware is up.
 
 ## Credits
 

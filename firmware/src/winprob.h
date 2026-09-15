@@ -11,6 +11,11 @@ namespace kings {
 
 static const float WINPROB_REG_SECS = 2880.0f;
 
+struct WinProbCoef { float a, b_ms, b_s, b_m, eps; };
+// Fitted offline by tools/train_winprob.py. The board refits the same model from the embedded
+// table on boot (winprob_train.h); this is the fallback and the reference the bench checks.
+static const WinProbCoef WINPROB_COMPILED = {WINPROB_A, WINPROB_B_MS, WINPROB_B_S, WINPROB_B_M, WINPROB_EPS};
+
 // "4:50" -> 290, "0:03.7" -> 3.7, "57.4" -> 57.4, "" -> 0. Only the last two fields count.
 inline float clockSeconds(const char* clock) {
   if (!clock || !*clock) return 0.0f;
@@ -35,21 +40,21 @@ inline float fracLeft(int period, float secsLeftInPeriod) {
 }
 
 // P(home team wins) given home lead (negative when trailing) and fraction of regulation left.
-inline float winProbHome(int homeMargin, float frac) {
-  float s = sqrtf(frac + WINPROB_EPS);
-  float z = WINPROB_A + WINPROB_B_MS * (homeMargin / s) + WINPROB_B_S * s + WINPROB_B_M * homeMargin;
+inline float winProbHome(int homeMargin, float frac, const WinProbCoef& c = WINPROB_COMPILED) {
+  float s = sqrtf(frac + c.eps);
+  float z = c.a + c.b_ms * (homeMargin / s) + c.b_s * s + c.b_m * homeMargin;
   if (z > 30.0f) z = 30.0f;
   if (z < -30.0f) z = -30.0f;
   return 1.0f / (1.0f + expf(-z));
 }
 
 // P(our team wins) for the polled game state. Returns -1 when there is no live score.
-inline float winProbUs(const GameState& gs) {
+inline float winProbUs(const GameState& gs, const WinProbCoef& c = WINPROB_COMPILED) {
   if (gs.us.score < 0 || gs.them.score < 0 || gs.period < 1) return -1.0f;
   float f = fracLeft(gs.period, clockSeconds(gs.clock));
   int ourMargin = gs.us.score - gs.them.score;
-  if (gs.weAreHome()) return winProbHome(ourMargin, f);
-  return 1.0f - winProbHome(-ourMargin, f);
+  if (gs.weAreHome()) return winProbHome(ourMargin, f, c);
+  return 1.0f - winProbHome(-ourMargin, f, c);
 }
 
 }  // namespace kings

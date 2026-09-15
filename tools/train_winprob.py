@@ -9,7 +9,13 @@ The margin/sqrt(time) term is the classic Brownian-motion view of a basketball g
 (Stern 1994); the sqrt(time) term carries home-court drift; the raw margin term is a small
 correction. Four floats, nothing the ESP32 cannot do in one expf.
 
+Training plays are binned to (margin, 5-second bucket) cells with win/loss counts, which is the
+same weighted fit as the raw rows to within the 5 s quantisation and shrinks 624k plays to ~35k
+cells (211 KB). The ESP32 embeds that table and refits the model itself on boot with the C++
+trainer in firmware/src/winprob_train.h; the native test bench checks the two trainers agree.
+
 Train on one season, evaluate on the next (time split), and write:
+    firmware/data/winprob_train.bin          binned training table (embedded in the firmware image)
     firmware/src/winprob_coef.h              coefficients for the firmware
     firmware/test/fixtures/winprob_cases.h   ~300 sampled plays with the Python probability (parity test)
     firmware/test/fixtures/winprob_eval.bin  every play of the held-out season, 5 bytes each (C++ replay bench)
@@ -28,6 +34,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 REG_SECS = 2880.0
 EPS_GRID = [0.002, 0.005, 0.01, 0.02]
+BUCKET_SECS = 5
 
 
 def load(season):
@@ -76,20 +83,41 @@ def solve4(A, b):
     return x
 
 
-def fit(rows, eps, iters=12, ridge=1e-6):
-    """Logistic regression by Newton-Raphson (IRLS)."""
-    X = [features(m, f, eps) for m, f, _, _, _ in rows]
-    y = [r[2] for r in rows]
+def bin_rows(rows):
+    """(margin, bucket) -> [wins, losses]; margin clamped to int8, time to BUCKET_SECS."""
+    cells = {}
+    for m, f, y, _, _ in rows:
+        key = (max(-127, min(127, m)), int(round(f * REG_SECS / BUCKET_SECS)))
+        c = cells.setdefault(key, [0, 0])
+        c[0 if y else 1] += 1
+    return cells
+
+
+def write_table(cells, path):
+    """4-byte header 'WP', bucket seconds, version 1; then 7-byte little-endian records
+    int8 margin, uint16 bucket, uint16 wins, uint16 losses. Mirrors winprob_train.h."""
+    import struct
+    with open(path, "wb") as f:
+        f.write(struct.pack("<2sBB", b"WP", BUCKET_SECS, 1))
+        for (m, b), (w, l) in sorted(cells.items()):
+            assert w < 65536 and l < 65536
+            f.write(struct.pack("<bHHH", m, b, w, l))
+
+
+def fit(cells, eps, iters=12, ridge=1e-6):
+    """Weighted logistic regression by Newton-Raphson (IRLS) on the binned cells.
+    Same arithmetic as winProbTrain() in firmware/src/winprob_train.h."""
+    X = [(features(m, b * BUCKET_SECS / REG_SECS, eps), w, w + l) for (m, b), (w, l) in sorted(cells.items())]
     coef = [0.0, 0.0, 0.0, 0.0]
     for _ in range(iters):
         g = [0.0] * 4
         H = [[0.0] * 4 for _ in range(4)]
-        for x, yi in zip(X, y):
+        for x, wins, n in X:
             z = coef[0] * x[0] + coef[1] * x[1] + coef[2] * x[2] + coef[3] * x[3]
             z = max(-30.0, min(30.0, z))
             p = 1.0 / (1.0 + math.exp(-z))
-            w = p * (1.0 - p)
-            d = yi - p
+            w = n * p * (1.0 - p)
+            d = wins - n * p
             for i in range(4):
                 g[i] += x[i] * d
                 Hi = H[i]
@@ -137,17 +165,21 @@ def main():
     test = load(args.test)
     print(f"train {args.train}: {len(train)} plays; test {args.test}: {len(test)} plays")
 
-    # pick eps on a 1-in-5 subsample of the training season, by training log loss
-    sub = train[::5]
+    cells = bin_rows(train)
+    table = ROOT / "firmware" / "data" / "winprob_train.bin"
+    table.parent.mkdir(exist_ok=True)
+    write_table(cells, table)
+    print(f"binned to {len(cells)} cells of {BUCKET_SECS} s -> {table.relative_to(ROOT)} ({table.stat().st_size / 1e3:.0f} KB)")
+
+    # pick eps by training log loss (on the raw plays), then fit at that eps
     best = None
     for eps in EPS_GRID:
-        c = fit(sub, eps)
-        m = metrics([(predict(c, mg, fr, eps), y) for mg, fr, y, _, _ in sub])
-        print(f"  eps={eps}: subsample logloss {m['logloss']:.5f}")
+        c = fit(cells, eps)
+        m = metrics([(predict(c, mg, fr, eps), y) for mg, fr, y, _, _ in train])
+        print(f"  eps={eps}: train logloss {m['logloss']:.5f}")
         if best is None or m["logloss"] < best[0]:
-            best = (m["logloss"], eps)
-    eps = best[1]
-    coef = fit(train, eps)
+            best = (m["logloss"], eps, c)
+    _, eps, coef = best
     print(f"eps={eps} coef a={coef[0]:.6f} b_ms={coef[1]:.6f} b_s={coef[2]:.6f} b_m={coef[3]:.6f}")
 
     ours = [(predict(coef, mg, fr, eps), y) for mg, fr, y, _, _ in test]
@@ -167,6 +199,8 @@ def main():
         "#define WINPROB_B_S   " + f"{coef[2]:.7f}f\n"
         "#define WINPROB_B_M   " + f"{coef[3]:.7f}f\n"
         "#define WINPROB_EPS   " + f"{eps:.7f}f\n"
+        f"#define WINPROB_TRAIN_CELLS {len(cells)}\n"
+        f"#define WINPROB_TRAIN_PLAYS {len(train)}\n"
     )
 
     # --- parity cases: sampled held-out plays with the Python probability, as period/clock the firmware sees
@@ -211,7 +245,8 @@ def main():
     doc = [f"# Live win probability: model and bench",
            "",
            f"Fitted by `tools/train_winprob.py` on every play of the {args.train - 1}-{args.train % 100:02d} season "
-           f"({len(train):,} plays after dropping ESPN's in-feed scoring corrections) and evaluated on every play of "
+           f"({len(train):,} plays after dropping ESPN's in-feed scoring corrections, binned to {len(cells):,} "
+           f"(margin, {BUCKET_SECS} s) cells with win/loss counts) and evaluated on every play of "
            f"{args.test - 1}-{args.test % 100:02d} ({len(test):,} plays, {len(games):,} games). "
            "ESPN's own in-game win probability, recorded on the same plays, is the benchmark.",
            "",
@@ -228,6 +263,15 @@ def main():
            "",
            f"Four coefficients in `firmware/src/winprob_coef.h`; inference is `winProbHome()` in "
            "`firmware/src/winprob.h`, one `expf` per poll.",
+           "",
+           "## The board trains itself",
+           "",
+           f"The binned table (`firmware/data/winprob_train.bin`, {table.stat().st_size / 1e3:.0f} KB) is embedded in the "
+           "firmware image, and `winProbTrain()` in `firmware/src/winprob_train.h` is the same Newton-Raphson fit "
+           "as the Python trainer, header-only C++ with no dependencies. On boot the ESP32 refits the model from the "
+           "table and reports the play count and time on the splash screen; the native bench "
+           "(`test/test_winprob_train`) runs that exact code on the host and checks it lands on the coefficients "
+           "above. The Python script is only needed to refresh the data.",
            "",
            f"## Held-out season {args.test - 1}-{args.test % 100:02d}",
            "",
@@ -260,6 +304,8 @@ def main():
             "",
             "- the ESP32 inference reproduces the Python probability on 300 sampled plays (parity),",
             "- symmetry, monotonicity and end-of-game behaviour of the function,",
+            "- the C++ trainer (`test/test_winprob_train`) refits from the embedded table and agrees with Python "
+            "on every prediction within 0.001, and recovers known coefficients from synthetic data,",
             f"- a replay of the whole held-out season ({len(test):,} plays in {len(games):,} games, "
             "`test/fixtures/winprob_eval.bin`, 5 bytes per play) through the firmware function. The C++ code must "
             "reproduce the table above: within 0.02 Brier of ESPN over the game and within 0.005 in the fourth quarter, "
