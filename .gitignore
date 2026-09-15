@@ -1,0 +1,14 @@
+# PlatformIO
+firmware/.pio/
+firmware/.vscode/
+# Python
+__pycache__/
+*.pyc
+.venv/
+# OpenSCAD / slicer exports are regenerated
+models/exports/*.stl
+# Printables downloads (redistribution not ours)
+models/printables/*
+!models/printables/README.md
+# OS
+.DS_Store
