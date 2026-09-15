@@ -35,20 +35,17 @@ echo "== Models"
 if [ $QUICK = 1 ]; then skp "OpenSCAD exports (--quick)"; elif [ -x "$OPENSCAD" ]; then
   run "export all parts" sh -c "cd models && make -B OPENSCAD='$OPENSCAD'"
   run "parts sanity (size, height <= 256 mm, footprint <= 256 mm)" python3 - <<'EOF'
-import struct, sys, glob
+import sys, glob
+sys.path.insert(0, "tools")
+from measure_arena import read_stl     # binary or ASCII (OpenSCAD 2021 writes ASCII)
 bad = 0
 for f in sorted(glob.glob("models/exports/*.stl")):
-    d = open(f, "rb").read()
-    n = (len(d) - 84) // 50                       # trust the file size; OpenSCAD 2021's header count can be off by one
-    if n < 4 or len(d) != 84 + n * 50: print("bad STL (not binary?)", f); bad += 1; continue
-    xs, ys, zs = [], [], []
-    for i in range(n):
-        v = struct.unpack_from("<12f", d, 84 + i * 50)
-        xs += v[3::3]; ys += v[4::3]; zs += v[5::3]
+    tris = read_stl(f)
+    xs = [v for t in tris for v in (t[0], t[3], t[6])]; ys = [v for t in tris for v in (t[1], t[4], t[7])]; zs = [v for t in tris for v in (t[2], t[5], t[8])]
     w, h, z = max(xs) - min(xs), max(ys) - min(ys), max(zs) - min(zs)
     flag = "" if (w <= 256 and h <= 256 and z <= 256) else "  <-- exceeds P1S 256 mm"
-    print(f"{f.split('/')[-1]:18s} {n:7d} tris  {w:6.1f} x {h:6.1f} x {z:6.1f} mm{flag}")
-    if flag: bad += 1
+    print(f"{f.split('/')[-1]:18s} {len(tris):7d} tris  {w:6.1f} x {h:6.1f} x {z:6.1f} mm{flag}")
+    if flag or len(tris) < 4: bad += 1
 sys.exit(1 if bad else 0)
 EOF
   cat /tmp/validate.log | sed 's/^/       /'
