@@ -199,7 +199,7 @@ make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, be
     <div>
       <div class="stephead"><div class="num">4</div><h3>Print the plinth test slice first</h3><span class="time">40 min print</span></div>
       <ol class="do">
-        <li>In Bambu Studio, import <code>exports/plinth_test.stl</code>. It's a 64 mm wide slice of the plinth's front. Print it in silver PLA, 0.2 mm, default walls, flat face down.</li>
+        <li>In Bambu Studio, import <code>exports/plinth_test.stl</code>. It's just the console from the front of the plinth. Print it in silver PLA, 0.2 mm, default walls, flat face down.</li>
         <li>When it's done, slide the display board <b>H</b> into the pocket from the open bottom, screen toward the window. It should slide with light finger pressure and stop with the glass against the window lip.</li>
         <li>Look at it from the front. The picture area of the screen (not the black border) should be centred in the opening with an even margin.</li>
       </ol>
@@ -539,53 +539,55 @@ pio run -e cyd_demo -t upload</pre>
 <section class="page">
   <div class="eyebrow">Part 4 · Arena and plinth</div>
   <h2>How the screen mounts</h2>
-  <p>The plinth has no screws. Behind the front window is a pocket, tilted back 20°, open toward the bottom. The board slides up into it from below; the window's lip stops the glass, and the bottom lid's bump holds the board up against that lip.</p>
-  <div class="dgrow two" style="margin-top:6pt"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Front view of the plinth: the window opening with the board's picture area centred behind it"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+  <p>The screen lives in a small sloped <b>console</b> on the front of the plinth. Its face leans back 20° so the picture points up at you at a desk, and because the console stands in front of the drum, nothing above it blocks the view. Inside the console is a pocket, open toward the bottom: the board slides up into it, the window's lip stops the glass, and a tongue on the bottom lid presses the board up against that lip. No screws.</p>
+  <div class="dgrow two" style="margin-top:6pt"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Front view: the sloped console on the front of the plinth with the window and the board's picture area centred in it"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
 <rect x="10" y="40" width="220" height="120" rx="6" class="fill"/>
-<rect x="72" y="62" width="96" height="76" rx="3" class="dark"/>
+<rect x="66" y="40" width="108" height="120" rx="3" fill="#e9e6f0" stroke="#1d1830" stroke-width="1.4"/>
 <rect x="60" y="54" width="120" height="92" rx="2" class="ghost"/>
+<rect x="72" y="62" width="96" height="76" rx="3" class="dark"/>
 <rect x="80" y="70" width="80" height="60" fill="#1a1030" stroke="#b48ae6"/>
 <text x="120" y="104" text-anchor="middle" style="fill:#fff;font-family:Barlow Condensed;font-weight:700;font-size:16px">102  98</text>
 <text x="120" y="30" text-anchor="middle" class="cap">FRONT</text>
-<text x="10" y="178" class="sm">solid: window opening 60 × 46 · dashed: board behind the wall</text>
-<text x="120" y="192" text-anchor="middle" class="sm">picture area centred in the opening</text>
-</svg></figure><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Side section of the plinth front: the tilted pocket behind the window, the board sliding up from below, the lip that holds the glass, and the bottom lid bump"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<text x="10" y="178" class="sm">console 96 mm wide · window 60 × 46 · dashed: board inside</text>
+<text x="120" y="192" text-anchor="middle" class="sm">picture area centred in the window</text>
+</svg></figure><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Side section: the console wedge stands in front of the drum, its face leaning back 20 degrees; the board slides up into the pocket behind the face from below; the lid's tongue and bump hold it up"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
 <text x="120" y="30" text-anchor="middle" class="cap">SIDE, CUT THROUGH</text>
-<path d="M20 44 L220 44 L220 52 L200 52 L200 160 L220 160 L220 176 L20 176 L20 160 L40 160 L40 120 L30 120 L30 52 L20 52 Z" class="fill"/>
-<path d="M30 52 L30 72 L40 72 M30 100 L30 120" class="ln"/>
-<rect x="24" y="74" width="10" height="26" fill="#fff" stroke="#1d1830"/>
-<text x="4" y="66" class="sm">lip</text><text x="4" y="90" class="sm">window</text>
-<g transform="translate(40 60) rotate(20 0 0)">
-<rect x="0" y="12" width="6" height="60" class="part"/><rect x="6" y="14" width="4" height="56" fill="#1d1830"/>
-</g>
-<text x="66" y="112" class="sm">board H, glass</text><text x="66" y="123" class="sm">against the lip</text><path d="M64 110 L52 96" class="dim"/>
-<path d="M56 150 L50 130" class="arrow"/><text x="60" y="150" class="sm">slides up from below</text>
-<rect x="20" y="176" width="200" height="8" fill="#fff" stroke="#1d1830"/><rect x="44" y="164" width="30" height="12" class="part"/>
-<text x="80" y="174" class="sm">lid D bump presses the board up</text>
-<text x="120" y="66" class="sm">pocket, tilted 20°</text><path d="M118 68 L60 84" class="dim"/>
-<text x="130" y="140" class="sm">inside of plinth (hollow)</text>
-<text x="20" y="196" class="sm">front is on the left</text>
+<path d="M60 44 L220 44 L220 52 L200 52 L200 160 L220 160 L220 176 L60 176 L60 160 L70 160 L70 52 L60 52 Z" class="fill"/>
+<path d="M60 52 L60 176 L24 176 L60 52 Z" class="fill"/>
+<path d="M60 52 L36 130" class="ln"/>
+<path d="M40 118 L34 136" stroke="#fff" stroke-width="4"/>
+<text x="4" y="80" class="sm">face</text><text x="4" y="91" class="sm">20°</text>
+<g transform="translate(44 62) rotate(20 0 0)"><rect x="0" y="6" width="5" height="62" class="part"/><rect x="5" y="8" width="4" height="58" fill="#1d1830"/></g>
+<text x="78" y="86" class="sm">board H in the pocket,</text><text x="78" y="97" class="sm">glass against the lip</text>
+<path d="M76 90 L60 92" class="dim"/>
+<path d="M50 168 L46 140" class="arrow"/><text x="56" y="152" class="sm">slides up from below</text>
+<rect x="24" y="176" width="196" height="8" fill="#fff" stroke="#1d1830"/><rect x="30" y="164" width="30" height="12" class="part"/>
+<text x="66" y="173" class="sm">lid D tongue + bump press the board up</text>
+<text x="130" y="120" class="sm">drum, hollow</text>
+<path d="M24 190 L60 190" class="dim"/><path d="M24 186 L24 194 M60 186 L60 194" class="dim"/><text x="42" y="199" text-anchor="middle" class="sm">~18 mm</text>
+<text x="150" y="199" class="sm">front is on the left</text>
 </svg></figure></div>
-  <div class="dgrow two" style="margin-top:10pt;align-items:start"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Bottom view of the upside-down plinth: the pocket opening at the front edge, the board going in screen-toward-the-window with the USB port toward the bottom edge"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+  <div class="dgrow two" style="margin-top:10pt;align-items:start"><figure class="dg" style="margin:0"><svg viewBox="0 0 240 200" role="img" aria-label="Bottom view of the upside-down plinth: the console's pocket opening in front of the drum circle; the board goes in screen toward the face, USB port on the left"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
 <text x="120" y="30" text-anchor="middle" class="cap">BOTTOM, PLINTH UPSIDE DOWN</text>
-<circle cx="120" cy="120" r="76" class="fill"/>
-<rect x="72" y="52" width="96" height="16" class="dark"/><text x="120" y="48" text-anchor="middle" class="sm">pocket opening (front)</text>
-<rect x="76" y="80" width="88" height="8" class="part"/><text x="120" y="104" text-anchor="middle" class="sm">board H on edge, screen ↑ to window</text>
-<path d="M120 112 L120 72" class="arrow"/>
-<rect x="76" y="84" width="10" height="4" fill="#1d1830"/><text x="60" y="126" class="sm">USB port on the left</text>
-<path d="M78 90 L84 118" class="dim"/>
+<circle cx="120" cy="120" r="72" class="fill"/>
+<rect x="72" y="36" width="96" height="30" rx="3" fill="#e9e6f0" stroke="#1d1830" stroke-width="1.4"/>
+<rect x="76" y="40" width="88" height="14" class="dark"/><text x="120" y="80" text-anchor="middle" class="sm">console · pocket opening</text>
+<rect x="76" y="92" width="88" height="8" class="part"/><rect x="76" y="96" width="10" height="4" fill="#1d1830"/>
+<text x="120" y="114" text-anchor="middle" class="sm">board H on edge, screen ↑ to the face</text>
+<path d="M120 90 L120 60" class="arrow"/>
+<text x="60" y="132" class="sm">USB port on the left</text><path d="M78 100 L84 124" class="dim"/>
 <rect x="110" y="182" width="20" height="10" fill="#fff" stroke="#1d1830"/><text x="136" y="190" class="sm">cable slot (back)</text>
 </svg></figure>
     <div>
       <div class="stephead"><div class="num">17</div><h3>Seat the display board</h3><span class="time">5 min</span></div>
       <ol class="do">
-        <li>Turn plinth <b>C</b> upside down, front (window) toward you. The pocket opening is the rectangular slot just inside the front edge.</li>
-        <li>Unplug the two pigtails from board <b>H</b> so nothing snags. Hold the board on its long edge, <b>screen facing the window side</b>, <b>USB port on the left</b>.</li>
+        <li>Turn plinth <b>C</b> upside down, console toward you. The pocket opening is the rectangular slot in the underside of the console.</li>
+        <li>Unplug the two pigtails from board <b>H</b> so nothing snags. Hold the board on its long edge, <b>screen facing the sloped face</b>, <b>USB port on the left</b>.</li>
         <li>Slide it into the pocket: light finger pressure, it stops when the glass meets the lip (same fit as step 4).</li>
         <li>Plug the pigtails back into P1 and CN1; they hang out of the open bottom. Plug in the USB cable.</li>
-        <li>Turn the plinth right side up and check through the window: picture centred, even black margin. Turn it back over for wiring.</li>
+        <li>Turn the plinth right side up and look at the console: picture centred in the window, even black margin. Turn it back over for wiring.</li>
       </ol>
-      <div class="note"><b>Loose?</b> A folded strip of masking tape on the back of the board (never the screen) takes up slack. The bottom lid's bump (step 19) also presses the board up.</div>
+      <div class="note"><b>Loose?</b> A folded strip of masking tape on the back of the board (never the screen) takes up slack. The bottom lid's tongue and bump (step 19) also press the board up.</div>
     </div>
   </div>
   <div class="folio"><span>Light the Beam</span><span>10</span></div>
@@ -622,7 +624,7 @@ pio run -e cyd_demo -t upload</pre>
 <rect x="284" y="160" width="10" height="14" fill="#fff" stroke="#1d1830"/><text x="238" y="186" class="sm">cable slot, back</text>
 <rect x="150" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/><rect x="180" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/><rect x="210" y="150" width="24" height="12" rx="2" fill="#fff" stroke="#1d1830"/>
 <text x="150" y="176" class="sm">3 lever nuts J</text>
-<g transform="translate(40 128) rotate(20)"><rect x="0" y="0" width="6" height="46" class="part"/></g><text x="34" y="192" class="sm">board H</text>
+<path d="M30 118 L30 200 L14 200 Z" class="fill"/><g transform="translate(24 150) rotate(20)"><rect x="0" y="0" width="5" height="44" class="part"/></g><text x="34" y="192" class="sm">board H in console</text>
 <rect x="150" y="96" width="14" height="6" class="part"/>
 <path d="M164 100 C200 100 220 84 232 82 C236 100 232 112 232 118 C232 140 210 150 200 150" stroke="#d0342c" stroke-width="1.6" fill="none"/>
 <path d="M62 150 C100 150 120 156 150 156" stroke="#d0342c" stroke-width="1.6" fill="none"/>
@@ -637,7 +639,7 @@ pio run -e cyd_demo -t upload</pre>
       <ol class="do">
         <li>Tuck the three connectors into the plinth, toward the back, away from the board.</li>
         <li>Route the board's USB cable out the <b>slot at the back</b> of the plinth (or, if you fitted the optional panel jack, plug its short cable into the board and leave the jack's socket facing out).</li>
-        <li>Fit bottom lid <b>D</b>: line up its finger hole toward the back, press it in evenly until it's flush. The bump on the lid lands under the board and pushes it up against the window.</li>
+        <li>Fit bottom lid <b>D</b>: its tongue goes <b>forward under the console</b>, finger hole toward the back. Press it in evenly until it's flush. The bump on the tongue lands under the board's bottom edge and pushes it up against the window lip.</li>
         <li>Set the arena down onto the plinth. It drops into the shallow recess in the top plate; turn it so the flat back edge is at the back and the strip wires aren't pinched.</li>
       </ol>
       <div class="check">Plinth lid flush, arena seated with no rocking, one cable out the back. Looking in the front window, the screen is centred and straight.</div>

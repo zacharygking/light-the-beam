@@ -61,6 +61,8 @@ const M = {
   beamBase: new THREE.MeshStandardMaterial({ color: col(0xffffff), emissive: col(0xc9a2f0), emissiveIntensity: 3 }),
 };
 
+const twoSided0 = new Map();
+function ds(mat) { if (!twoSided0.has(mat)) { const c = mat.clone(); c.side = THREE.DoubleSide; twoSided0.set(mat, c); } return twoSided0.get(mat); }
 function mesh(geo, mat, opts = {}) {
   const m = new THREE.Mesh(geo, mat);
   m.castShadow = opts.cast !== false; m.receiveShadow = opts.receive !== false;
@@ -85,10 +87,16 @@ function makePlinth({ cutaway = false } = {}) {
   // recess ring on top (where the arena sits)
   const ring = mesh(new THREE.TorusGeometry(110.5, 1.2, 8, 128), M.silverDark, { cast: false });
   ring.rotation.x = Math.PI / 2; ring.position.y = h + 0.2; g.add(ring);
-  // flat facet on the front of the drum; the screen sits recessed in it
-  const facet = mesh(new THREE.BoxGeometry(74, 50, 16), M.silver); facet.position.set(0, 25, 104); g.add(facet);
-  const win = new THREE.Group(); win.position.set(0, 25, 112);
-  const bezel = mesh(new THREE.BoxGeometry(62, 46, 4), M.black); bezel.position.z = 1; win.add(bezel);   // 1 mm proud of the facet
+  // sloped console on the front: face leans back 20 deg, bottom edge ~18 mm in front of the drum
+  const tilt = THREE.MathUtils.degToRad(20), out = 50 * Math.tan(tilt);
+  const sh = new THREE.Shape();   // (u = outward from drum face, v = up), stored as (-u, v) for rotateY(90)
+  sh.moveTo(20, 0); sh.lineTo(-out, 0); sh.lineTo(0, 50); sh.lineTo(20, 50); sh.closePath();
+  const wg = new THREE.ExtrudeGeometry(sh, { depth: 96, bevelEnabled: false });
+  wg.rotateY(Math.PI / 2); wg.translate(-48, 0, r);
+  const wedge = mesh(wg, ds(M.silver)); g.add(wedge);
+  const win = new THREE.Group();
+  win.position.set(0, 25, r + out / 2); win.rotation.x = -tilt;
+  const bezel = mesh(new THREE.BoxGeometry(62, 46, 4), M.black); bezel.position.z = 1; win.add(bezel);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial()); screen.position.z = 3.05; win.add(screen);
   g.add(win);
   // cable out the back
@@ -125,34 +133,60 @@ function outlineShape(scale = 1) {
   return sh;
 }
 // vertical extrusion of the outline from y0 to y1
-const twoSided = new Map();
-function ds(mat) { if (!twoSided.has(mat)) { const c = mat.clone(); c.side = THREE.DoubleSide; twoSided.set(mat, c); } return twoSided.get(mat); }
 function slab(scale, y0, y1, mat, opts) {
   const g = new THREE.ExtrudeGeometry(outlineShape(scale), { depth: y1 - y0, bevelEnabled: false, curveSegments: 1 });
   const m = mesh(g, ds(mat), opts); m.rotation.x = -Math.PI / 2; m.position.y = y0; return m;
 }
+// Sawtooth version of the outline: each edge is split into ~12 mm facets that alternate
+// 0 / +depth along the outward normal, so the upper cladding reads as angled metal panels.
+function facetedShape(scale = 1, depth = 3.5, pitch = 12) {
+  const pts = [];
+  const n = OUTLINE.length;
+  for (let i = 0; i < n; i++) {
+    const a = OUTLINE[i].map(v => v * scale), b = OUTLINE[(i + 1) % n].map(v => v * scale);
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy);
+    const nx = dy / len, ny = -dx / len;      // outward normal (outline is clockwise in shape space)
+    const cnt = Math.max(2, Math.round(len / pitch));
+    for (let k = 0; k < cnt; k++) {
+      const t = k / cnt, o = (k % 2) ? depth : 0;
+      pts.push([a[0] + dx * t + nx * o, a[1] + dy * t + ny * o]);
+    }
+  }
+  const sh = new THREE.Shape();
+  pts.forEach((pt, i) => i ? sh.lineTo(pt[0], pt[1]) : sh.moveTo(pt[0], pt[1]));
+  sh.closePath();
+  return sh;
+}
+function facetedSlab(scale, y0, y1, mat) {
+  const g = new THREE.ExtrudeGeometry(facetedShape(scale), { depth: y1 - y0, bevelEnabled: false, curveSegments: 1 });
+  g.computeVertexNormals();
+  const m = mesh(g, ds(mat)); m.rotation.x = -Math.PI / 2; m.position.y = y0; return m;
+}
+
 function makeArenaBase() {
   const g = new THREE.Group();
-  g.add(slab(1.0, 0, 3, M.silver));            // floor
-  g.add(slab(0.985, 3, 26, M.glass));          // lower glass storey
-  g.add(slab(1.0, 26, 54, M.glass));           // upper storey: dark glass behind the fins
-  g.add(slab(1.07, 54, 60, M.silver));         // roof overhang
-  // facade fins every ~9 mm around the outline, full height, standing proud of the wall
+  g.add(slab(1.0, 0, 3, M.silver));                 // floor / plaza plinth
+  g.add(slab(0.985, 3, 24, M.glass));               // lower level: glass curtain wall
+  // glass mullions: slim verticals every ~14 mm, and a head rail
   const n = OUTLINE.length;
   for (let i = 0; i < n; i++) {
     const a = OUTLINE[i], b = OUTLINE[(i + 1) % n];
-    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy), count = Math.max(2, Math.round(len / 9));
-    const ang = Math.atan2(dx, -dy);   // fin faces outward
-    for (let k = 0; k <= count; k++) {
+    const dx = b[0] - a[0], dy = b[1] - a[1], len = Math.hypot(dx, dy), count = Math.round(len / 14);
+    const ang = Math.atan2(dx, -dy);
+    for (let k = 1; k < count; k++) {
       const t = k / count;
-      if (i > 0 && k === 0) continue;
-      const fin = mesh(new THREE.BoxGeometry(2.4, 50, 2.4), M.silverDark);
-      fin.position.set(a[0] + dx * t, 4 + 25, -(a[1] + dy * t));
-      fin.rotation.y = -ang; g.add(fin);
+      const mu = mesh(new THREE.BoxGeometry(1, 20, 1), M.silverDark, { cast: false });
+      mu.position.set(a[0] * 0.985 + dx * 0.985 * t, 13.5, -(a[1] * 0.985 + dy * 0.985 * t)); mu.rotation.y = -ang; g.add(mu);
     }
   }
-  // hangar-door bay on the flat back edge
-  const bay = mesh(new THREE.BoxGeometry(70, 20, 3), M.glass); bay.position.set(0, 16, -96.5); g.add(bay);
+  g.add(slab(1.0, 24, 27, M.silverDark));           // spandrel band between glass and cladding
+  g.add(facetedSlab(1.0, 27, 56, M.silver));        // upper band: faceted metal panels
+  g.add(slab(1.06, 56, 60, M.silver));              // roof edge
+  // hangar doors: five tall glass bays across the flat back (plaza) edge, framed in metal
+  for (let i = -2; i <= 2; i++) {
+    const frame = mesh(new THREE.BoxGeometry(17, 30, 2), M.silverDark); frame.position.set(i * 19, 18, -95.5); g.add(frame);
+    const door = mesh(new THREE.BoxGeometry(15, 27, 2.2), M.glass, { cast: false }); door.position.set(i * 19, 18, -95.6); g.add(door);
+  }
   return g;
 }
 
@@ -161,10 +195,13 @@ function makeRoof() {
   const g = new THREE.Group();
   g.add(slab(1.07, 0, 4, M.silver));
   g.add(slab(0.82, 4, 9, M.silver));
-  // seams: a grid across the inner panel
-  const seam = M.silverDark;
-  for (let x = -60; x <= 60; x += 24) { const b = mesh(new THREE.BoxGeometry(0.8, 0.6, 130), seam, { cast: false }); b.position.set(x, 9.2, 4); g.add(b); }
-  for (let z = -60; z <= 70; z += 24) { const b = mesh(new THREE.BoxGeometry(150, 0.6, 0.8), seam, { cast: false }); b.position.set(0, 9.2, z); g.add(b); }
+  // solar array: rows of dark panels across the inner deck
+  const pv = new THREE.MeshStandardMaterial({ color: col(0x1b2440), roughness: 0.25, metalness: 0.5 });
+  for (let x = -66; x <= 66; x += 22) for (let z = -62; z <= 60; z += 16) {
+    if (Math.hypot(x, z - 4) < 16) continue;   // keep clear of the beam
+    if (Math.abs(x) > 44 && Math.abs(z) > 44) continue;
+    const pnl = mesh(new THREE.BoxGeometry(19, 1.2, 12), pv, { cast: false }); pnl.position.set(x, 9.6, z); pnl.rotation.x = THREE.MathUtils.degToRad(-6); g.add(pnl);
+  }
   // rooftop plant
   for (const [x, z, w, d] of [[-55, 60, 14, 10], [60, 50, 12, 12], [40, -70, 10, 8]]) { const b = mesh(new THREE.BoxGeometry(w, 4, d), M.silverDark); b.position.set(x, 11, z); g.add(b); }
   const hole = mesh(new THREE.TorusGeometry(7.2, 1, 8, 48), M.silverDark, { cast: false });
@@ -300,7 +337,7 @@ if (VIEW === 'hero' || VIEW === 'screen') {
   const roof = makeRoof(); roof.position.y = ROOF_Y; scene.add(roof);
   const tube = makeTube(); tube.position.y = TUBE_Y; scene.add(tube);
   if (VIEW === 'hero') look(320, 300, 540, 0, 115, 0, 33);
-  else look(110, 80, 300, 0, 40, 70, 24);
+  else look(120, 110, 320, 0, 35, 80, 24);
 }
 
 if (VIEW === 'exploded') {
@@ -339,7 +376,7 @@ if (VIEW === 'strip') {
 
 if (VIEW === 'cutaway') {
   const plinth = makePlinth({ cutaway: true }); scene.add(plinth);
-  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(90); board.position.set(0, 25, 101); scene.add(board);
+  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.position.set(0, 25, 118); scene.add(board);
   for (let i = 0; i < 3; i++) { const w = makeWago(); w.position.set(-40 + i * 22, 4.5, -60); scene.add(w); }
   scene.add(wire([[-30, 8, -62], [-20, 20, -20], [-10, 30, 40], [-5, 34, 88]], M.wireRed));
   scene.add(wire([[-8, 8, -62], [0, 22, -20], [5, 32, 40], [8, 36, 88]], M.wireWhite));
