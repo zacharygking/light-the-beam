@@ -15,7 +15,7 @@ for v in $VIEWS; do
     *) W=1000; H=700 ;;
   esac
   "$CHROME" --headless=new --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist \
-    --hide-scrollbars --virtual-time-budget=10000 --window-size=$W,$H \
+    --allow-file-access-from-files --hide-scrollbars --virtual-time-budget=20000 --window-size=$W,$H \
     --screenshot="$PWD/$OUT/$v.png" "file://$PWD/$OUT/scene.html?view=$v&w=$W&h=$H" 2>/dev/null
   echo "rendered $OUT/$v.png"
 done

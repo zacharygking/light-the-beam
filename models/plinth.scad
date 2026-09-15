@@ -10,19 +10,24 @@
 //   openscad -o exports/plinth_lid.stl -D part=\"lid\" plinth.scad
 //   openscad -o exports/plinth_test.stl -D part=\"test\" plinth.scad   <- console only, ~40 min
 //
-// MEASURE FIRST: arena_d is the arena's footprint at its floor. Set it from the
-// downloaded 220 mm STL (Bambu Studio > Measure) before printing the body.
+// The arena footprint comes from arena_outline.scad, written by tools/measure_arena.py from
+// the downloaded 220 mm STL. Re-run that script if you print a different size.
+
+include <arena_outline.scad>
 
 part = "body";            // "body" | "lid" | "test"
 
-// ---- arena (measure these) ---------------------------------------------------
-arena_d        = 220;     // footprint diameter of the arena base at the floor
-arena_wire_a   = 180;     // angle (deg) where the arena's wire hole is; 0 = front, 180 = back
+// ---- arena (from the measured STL) --------------------------------------------
+arena_rot      = 90;      // rotate the measured outline so its flat edge faces the back (+Y)
+arena_clear    = 0.3;     // gap around the arena in the recess
 recess_depth   = 2;       // how deep the arena sits into the top plate
+// the arena's wire channel leaves the flat (back) wall here, in the rotated frame:
+// x = 50 mm right of centre, at the recess edge; open from 3 to 10 mm above the arena floor
+wire_exit      = [50, 103];
 
 // ---- plinth ------------------------------------------------------------------
-plinth_d       = arena_d + 10;
-plinth_h       = 50;
+plinth_d       = 230;
+plinth_h       = 56;      // 56 gives the screen window a ~7 mm frame top and bottom
 wall           = 3;
 top_t          = 3;       // top plate thickness
 lid_t          = 2.4;
@@ -58,11 +63,12 @@ module drum() {
         cylinder(d = plinth_d, h = plinth_h);
         // hollow, open at the bottom
         translate([0, 0, -eps]) cylinder(d = plinth_d - 2 * wall, h = plinth_h - top_t + eps);
-        // arena locating recess in the top plate
-        translate([0, 0, plinth_h - recess_depth]) cylinder(d = arena_d + 0.6, h = recess_depth + eps);
-        // wire pass-through under the arena's wire hole
-        rotate([0, 0, arena_wire_a]) translate([arena_d / 2 - 12, 0, plinth_h - top_t - eps])
-            hull() { cylinder(d = 8, h = top_t + 1); translate([-10, 0, 0]) cylinder(d = 8, h = top_t + 1); }
+        // arena locating recess in the top plate: the measured footprint, rotated flat-edge-back
+        translate([0, 0, plinth_h - recess_depth]) linear_extrude(recess_depth + eps)
+            rotate(arena_rot) offset(r = arena_clear) polygon(arena_outline);
+        // wire slot through the top plate, just outside the recess under the arena's wire exit
+        translate([wire_exit[0], wire_exit[1] + 1, plinth_h - top_t - eps])
+            hull() { for (dx = [-5, 5]) translate([dx, 0, 0]) cylinder(d = 6, h = top_t + 1); }
         // lid rebate so the lid sits flush
         translate([0, 0, -eps]) cylinder(d = plinth_d - 2 * wall + 2 * 1.2, h = lid_t + eps);
     }

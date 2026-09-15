@@ -10,13 +10,19 @@ https://www.printables.com/model/338758-golden-1-center-light-the-beam
 
 These STLs are not committed to this repo (they're the author's work, licensed on Printables).
 
+Name them `base_220.stl` and `lid_220_nohole.stl` here (the holed lid as `lid_220_hole.stl` if
+you grabbed it too).
+
 ## Measure before printing the plinth
 
-In Bambu Studio, open the base and use the Measure tool to get:
+`python3 tools/measure_arena.py` from the repo root slices the base and writes
+`models/arena_outline.scad`, which the plinth recess is cut to. What it found on the 220 mm file:
 
-1. Footprint diameter at the floor → `arena_d` in `../plinth.scad`
-2. Angle of the wire hole around the base (front = 0°) → `arena_wire_a`
-3. Whether the floor is open or solid (if solid, the beam socket's wire hole needs a matching
-   hole drilled or cut in the floor)
+- footprint 205.8 × 208.2 mm, D-shaped: flat wall on one side, prow opposite
+- solid floor about 2 mm thick, with an octagonal well ~125 mm across in the middle (the socket
+  goes there) and a solid deck around it
+- a wire channel from the well to an opening in the flat wall near its right corner, 3–10 mm
+  above the floor
+- the lid seats on the inner box at 49.5 mm
 
 Then `make` in `../` to export the STLs, and print `plinth_test.stl` first.

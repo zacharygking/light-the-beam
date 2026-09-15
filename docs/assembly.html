@@ -146,7 +146,7 @@
     <div>A computer with a USB port (for flashing, once)</div>
     <div>Isopropyl alcohol wipe (for the socket glue joint)</div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>1</span></div>
+  <div class="folio"><span>Light the Beam</span><span>2</span></div>
 </section>
 
 <!-- ============================ PART 1: PRINT (page 3) ============================ -->
@@ -166,15 +166,17 @@
   </div>
   <div class="step full">
     <div>
-      <div class="stephead"><div class="num">2</div><h3>Measure the base for the plinth</h3><span class="time">10 min</span></div>
-      <p>The plinth is generated to fit your arena, so it needs two numbers from the base file.</p>
+      <div class="stephead"><div class="num">2</div><h3>Measure the base for the plinth</h3><span class="time">2 min</span></div>
+      <p>The plinth's recess is cut to the arena's exact footprint, so it needs the outline from the base file. A script reads it for you.</p>
       <ol class="do">
-        <li>Open <b>Bambu Studio</b>, drag the base STL onto the plate. Click the model and check the size readout in the right panel: you should see roughly 220 × 200 × 70 mm.</li>
-        <li>Choose the <b>Measure</b> tool (ruler icon in the top toolbar). Click the flat back edge of the footprint, then the front prow: that's the <b>depth</b>. Then the widest left–right span: the <b>width</b>. Write both down.</li>
-        <li>Look at the back wall near the floor for the author's <b>wire hole</b>. Note which side it's on when the flat edge faces you: that is the back, angle 180°.</li>
-        <li>Open <code>models/plinth.scad</code> in a text editor. Set <code>arena_d</code> to the <b>larger</b> of your two numbers, and <code>arena_wire_a</code> to 180 (back) or wherever the hole is. Save.</li>
+        <li>Rename the two downloaded files to <code>base_220.stl</code> and <code>lid_220_nohole.stl</code> inside <code>models/printables/</code>.</li>
+        <li>In Terminal, from the project folder, run <code>python3 tools/measure_arena.py</code>. It prints the footprint size, the floor thickness, where the wire channel exits, and writes <code>models/arena_outline.scad</code>.</li>
       </ol>
-      <div class="check">Your <code>arena_d</code> should be within a few mm of 220. If it's wildly different you picked the wrong size file.</div>
+      <pre>python3 tools/measure_arena.py
+# footprint 205.8 x 208.2 mm ... floor ~2 mm ... wire exit on the flat wall, back right ... lid seats at 49.5 mm
+# wrote models/arena_outline.scad</pre>
+      <div class="check">The reported footprint is about 206 × 208 mm. If it's far off, you copied the wrong size file.</div>
+      <div class="note"><b>What's inside the arena.</b> The floor is solid and about 2 mm thick. In the middle is an octagonal well about 125 mm across (the author hollowed it for a light bar; our socket goes there). A wire channel already runs from that well to an opening in the flat back wall, near the right corner, 3–10 mm above the floor. The lid drops onto the inner box at 49.5 mm.</div>
     </div>
   </div>
   <div class="step full">
@@ -188,7 +190,7 @@
 make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, beam_tube.stl, beam_spine.stl, beam_socket.stl</pre>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>2</span></div>
+  <div class="folio"><span>Light the Beam</span><span>3</span></div>
 </section>
 
 <!-- ============================ PART 1: PRINT (page 4) ============================ -->
@@ -211,7 +213,7 @@ make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, be
       <div class="stephead"><div class="num">5</div><h3>Cut the beam hole in the lid</h3><span class="time">3 min</span></div>
       <ol class="do">
         <li>Import the <b>no-hole lid</b>. Right-click it → <b>Add Negative Part</b> → <b>Cylinder</b>.</li>
-        <li>In the negative part's settings set size <b>12.4 × 12.4 × 20 mm</b> and position it dead centre of the lid (X 0, Y 0 relative to the lid), sticking through the top and bottom.</li>
+        <li>In the negative part's settings set size <b>12.4 × 12.4 × 20 mm</b>. Position it at the centre of the lid's inner raised panel (that's where the well below it is centred), sticking through the top and bottom.</li>
         <li>Slice and confirm the preview shows a round hole through the lid.</li>
       </ol>
       <div class="note"><b>12.4, not 12.</b> The tube is 12 mm; the extra 0.4 is print tolerance so it slides without forcing.</div>
@@ -233,7 +235,7 @@ make            # writes exports/plinth.stl, plinth_lid.stl, plinth_test.stl, be
       <div class="note"><b>Plate layout.</b> The base alone fills most of the plate. Print it on its own, then lid + spine + socket together, then the plinth on its own, then the tube on its own (a 250 mm vase print doesn't like neighbours).</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>3</span></div>
+  <div class="folio"><span>Light the Beam</span><span>4</span></div>
 </section>
 
 <!-- ============================ PART 2: FLASH (page 5) ============================ -->
@@ -275,7 +277,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="note"><b>Want to watch it think?</b> <code>pio device monitor -b 115200</code> shows the log: WiFi, each ESPN fetch, and the beam decisions.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>4</span></div>
+  <div class="folio"><span>Light the Beam</span><span>5</span></div>
 </section>
 
 <!-- ============================ PART 3: BEAM (page 6) ============================ -->
@@ -340,7 +342,7 @@ pio run -e cyd_demo -t upload</pre>
       <text x="20" y="160" class="sm">spine F</text>
     </svg></div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>5</span></div>
+  <div class="folio"><span>Light the Beam</span><span>6</span></div>
 </section>
 
 <!-- ============================ PART 3: BEAM (page 7) ============================ -->
@@ -391,7 +393,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="warn"><b>Nothing lights?</b> Unplug first. Check green is on IO22 (not IO27) and red is on VIN (not 3V3). Check the strip's arrows point away from the wired end. <b>Only the first LED lights, or colours flicker?</b> The data signal is marginal: shorten the green lead, or add the optional 74AHCT125 level shifter between IO22 and the strip.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>6</span></div>
+  <div class="folio"><span>Light the Beam</span><span>7</span></div>
 </section>
 
 <!-- ============================ WIRING REFERENCE ============================ -->
@@ -438,12 +440,12 @@ pio run -e cyd_demo -t upload</pre>
 </g>
 <g transform="translate(10 160)">
 <line x1="0" y1="10" x2="60" y2="10" stroke="#2f9e44" stroke-width="1.5"/><path d="M60 10 C72 10 72 16 60 16 L30 16" stroke="#2f9e44" stroke-width="1.5" fill="none"/>
-<text x="80" y="14">Thin board pigtail wire: fold the bare end back on itself so it's doubled, then insert.</text>
+<text x="80" y="14">Thin board wire: fold the bare end back on itself, then insert.</text>
 </g>
 </svg><figcaption>One joint per connector: a board wire in one port, the matching strip wire in another. The third port stays empty.</figcaption></figure></div>
 
   <div class="warn" style="margin-top:10pt"><b>Red goes to VIN, never to 3V3.</b> 3V3 can't supply the strip and you'll get a dim, flickering beam. <b>Green goes to IO22, not IO27</b> (they're neighbours on CN1). The unused wires on each pigtail (TX, RX, IO27, 3V3) get folded back and taped.</div>
-  <div class="folio"><span>Light the Beam</span><span>7</span></div>
+  <div class="folio"><span>Light the Beam</span><span>8</span></div>
 </section>
 
 <!-- ============================ PART 4: ARENA (page 8) ============================ -->
@@ -455,57 +457,54 @@ pio run -e cyd_demo -t upload</pre>
       <div class="stephead"><div class="num">14</div><h3>Glue the socket to the arena floor</h3><span class="time">5 min + glue time</span></div>
       <ol class="do">
         <li>Unplug the board and open the three lever nuts to free the strip. Leave the taped board leads in place.</li>
-        <li>Take arena base <b>A</b> and find the centre of the floor: measure the width and the depth of the inside floor with the ruler, mark the halfway point of each with a pencil, and mark where they cross.</li>
+        <li>Take arena base <b>A</b>, lid off. In the middle of the floor is an <b>octagonal well</b>. Measure across it both ways with the ruler, mark the halfway points in pencil, and mark where the lines cross: that's the centre.</li>
         <li>Wipe the floor there and the underside of socket <b>G</b> with the alcohol wipe.</li>
-        <li>Socket <b>G</b> has a slot in its side. Sit it dry on the mark with the <b>slot facing the back</b> of the arena (the flat edge, where the wire hole is). Draw round it with the pencil.</li>
+        <li>Socket <b>G</b> has a slot in its side. Sit it dry on the mark with the <b>slot facing the wire channel</b>: the groove that leaves the well toward the flat back wall's right-hand corner. Draw round it with the pencil.</li>
         <li>Lift it, run a ring of hot glue on its underside (or four dots of super glue), and press it back onto the pencil outline. Hold for 30 seconds. Super glue: leave it 10 minutes.</li>
       </ol>
       <div class="warn"><b>Centre and level matter.</b> The tube is 250 mm tall, so a socket 2 mm off-centre puts the tube off-centre in the lid hole, and a socket glued on a blob of glue makes the beam lean. Press it flat.</div>
     </div>
-    <div class="sketch"><svg viewBox="0 0 300 260" role="img" aria-label="Top view of the arena floor with the socket at the crossing of the two centre lines, slot toward the back wire hole">
-      <path d="M60 30 L240 30 L286 74 L272 150 L228 214 L150 244 L72 214 L28 150 L14 74 Z" fill="#e9e6f0" stroke="#8f8aa3" stroke-width="2"/>
-      <path d="M78 46 L222 46 L262 84 L250 148 L214 200 L150 224 L86 200 L50 148 L38 84 Z" fill="#f4f2f8" stroke="#b8b2c8"/>
-      <line x1="150" y1="46" x2="150" y2="224" stroke="#5a2d81" stroke-dasharray="4 4"/>
-      <line x1="38" y1="135" x2="262" y2="135" stroke="#5a2d81" stroke-dasharray="4 4"/>
-      <circle cx="150" cy="135" r="18" fill="#fff" stroke="#8f8aa3" stroke-width="2"/>
-      <circle cx="150" cy="135" r="9" fill="#e9e6f0" stroke="#8f8aa3"/>
-      <rect x="147" y="117" width="6" height="12" fill="#fff" stroke="#8f8aa3"/>
-      <rect x="138" y="26" width="24" height="8" fill="#0e0a1a"/>
-      <text x="166" y="24" class="sm">wire hole, back wall</text>
-      <text x="172" y="140">socket G</text>
-      <text x="172" y="152" class="sm">slot toward the back</text>
-      <text x="150" y="256" text-anchor="middle" class="sm">front (prow)</text>
-      <text x="20" y="20" class="sm">arena A, seen from above, lid off</text>
+    <div class="sketch"><svg viewBox="0 0 300 260" role="img" aria-label="Top view of the arena with the lid off: D-shaped footprint with the flat wall at the back, the octagonal well in the middle, the socket at its centre, and the wire channel running from the well to the back wall's right corner">
+      <path d="M40 60 L40 200 L88 240 L200 244 L262 200 L262 40 L150 20 L60 36 Z" fill="#e9e6f0" stroke="#8f8aa3" stroke-width="2"/>
+      <path d="M100 82 L150 66 L202 82 L222 130 L202 178 L150 194 L100 178 L80 130 Z" fill="#f4f2f8" stroke="#b8b2c8" stroke-width="1.5"/>
+      <path d="M212 160 L246 196 L262 196" fill="none" stroke="#5a2d81" stroke-width="5" stroke-linecap="round" opacity=".35"/>
+      <line x1="150" y1="66" x2="150" y2="194" stroke="#5a2d81" stroke-dasharray="4 4"/><line x1="80" y1="130" x2="222" y2="130" stroke="#5a2d81" stroke-dasharray="4 4"/>
+      <circle cx="150" cy="130" r="16" fill="#fff" stroke="#8f8aa3" stroke-width="2"/><circle cx="150" cy="130" r="8" fill="#e9e6f0" stroke="#8f8aa3"/>
+      <rect x="163" y="127" width="10" height="6" fill="#fff" stroke="#8f8aa3"/>
+      <text x="84" y="56" class="sm">octagonal well</text>
+      <text x="170" y="122">socket G</text><text x="170" y="134" class="sm">slot toward channel</text>
+      <text x="196" y="222" class="sm">wire channel → back wall</text>
+      <text x="266" y="120" class="sm" transform="rotate(90 266 120)">flat back wall</text>
+      <text x="20" y="254" class="sm">arena A from above, lid off · front (prow) at the left</text>
     </svg></div>
   </div>
   <div class="step">
     <div>
       <div class="stephead"><div class="num">15</div><h3>Stand the beam and route the wires</h3><span class="time">3 min</span></div>
       <ol class="do">
-        <li>Pass the strip's three wires <b>through the socket's slot</b>, then along the floor and <b>out through the wire hole</b> in the back wall. Pull them through so there's no slack coiled inside.</li>
+        <li>Pass the strip's three wires <b>through the socket's slot</b>, lay them in the <b>wire channel</b>, and push them out through its opening in the flat back wall (right-hand corner, just above the floor). Pull them through so there's no slack coiled in the well.</li>
         <li>Lower the tube's foot flange into the socket. It should drop in with a little play and stand straight up.</li>
         <li>Sight down from the front and from the side: the tube should be vertical. If it leans, the socket isn't flat; reheat the glue and reseat.</li>
       </ol>
       <div class="check">Tube stands straight, spins freely in the socket, wires exit the back of the arena with no strain on the strip.</div>
     </div>
-    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 240" role="img" aria-label="Section through the arena floor: socket glued at centre, tube foot dropped in, wires through the slot and out the back wall hole"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
-<path d="M20 200 L20 60 L34 60 L34 186 L286 186 L286 100 L300 100 L300 200 Z" class="fill"/>
-<rect x="286" y="150" width="14" height="16" fill="#fff" stroke="#1d1830"/><text x="238" y="146" class="sm">wire hole</text>
+    <figure class="dg" style="margin:0"><svg viewBox="0 0 320 240" role="img" aria-label="Section through the arena: the octagonal well in the middle of the solid deck, the socket glued in it, the tube foot dropped in, and the wire channel running from the well to the opening in the back wall"><defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5a2d81"/></marker></defs>
+<path d="M20 200 L20 60 L34 60 L34 186 L96 186 L96 120 L224 120 L224 186 L286 186 L286 100 L300 100 L300 200 Z" class="fill"/>
+<rect x="224" y="176" width="76" height="10" fill="#fff" stroke="#1d1830"/><rect x="286" y="168" width="14" height="18" fill="#fff" stroke="#1d1830"/>
+<text x="208" y="168" class="sm">wire channel, built in</text><text x="232" y="212" class="sm">opening in the back wall</text><path d="M290 200 L293 187" class="dim"/>
+<text x="100" y="112" class="sm">octagonal well, ~125 mm across</text>
 <rect x="128" y="162" width="64" height="24" rx="2" class="part"/><text x="126" y="156" class="cap">socket G</text>
 <rect x="150" y="168" width="20" height="18" fill="#fff" stroke="#5a2d81"/>
-<rect x="170" y="172" width="22" height="8" fill="#fff" stroke="#5a2d81"/><text x="196" y="180" class="sm">slot → back</text>
+<rect x="170" y="172" width="22" height="8" fill="#fff" stroke="#5a2d81"/><text x="196" y="180" class="sm">slot → channel</text>
 <rect x="152" y="20" width="16" height="152" fill="#f2e9ff" stroke="#8d86a3"/><rect x="148" y="166" width="24" height="6" fill="#f2e9ff" stroke="#8d86a3"/>
 <text x="176" y="40">tube E</text>
 <path d="M160 6 L160 30" class="arrow"/><text x="168" y="12" class="sm">drop in</text>
-<path d="M168 176 C200 176 220 176 260 176 C280 176 288 170 296 158" stroke="#d0342c" stroke-width="1.6" fill="none"/>
-<path d="M168 178 C200 178 224 178 262 178 C282 178 290 172 298 160" stroke="#2f9e44" stroke-width="1.6" fill="none"/>
-<path d="M128 196 L192 196" class="dim"/><path d="M128 192 L128 200 M192 192 L192 200" class="dim"/>
-<text x="160" y="212" text-anchor="middle" class="sm">glue ring, socket pressed flat</text>
-<text x="40" y="230" class="sm">arena A floor, front on the left</text>
-<path d="M160 214 L160 222" class="dim"/>
-</svg><figcaption>Glue the socket dead centre with its slot toward the back. Wires go through the slot, along the floor and out the wire hole.</figcaption></figure>
+<path d="M168 178 C200 178 230 180 260 181 C282 181 290 180 298 176" stroke="#d0342c" stroke-width="1.6" fill="none"/>
+<path d="M168 180 C200 182 232 183 262 183 C284 183 292 182 299 179" stroke="#2f9e44" stroke-width="1.6" fill="none"/>
+<text x="40" y="230" class="sm">arena A, front on the left, flat back wall on the right</text>
+</svg><figcaption>Glue the socket in the centre of the well, slot toward the channel. Wires run along the channel and out the back-wall opening.</figcaption></figure>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>8</span></div>
+  <div class="folio"><span>Light the Beam</span><span>9</span></div>
 </section>
 
 <!-- ============================ PART 4: PLINTH (page 9) ============================ -->
@@ -516,8 +515,8 @@ pio run -e cyd_demo -t upload</pre>
     <div>
       <div class="stephead"><div class="num">16</div><h3>Fit the lid</h3><span class="time">1 min</span></div>
       <ol class="do">
-        <li>Hold lid <b>B</b> level above the arena, hole over the tube. Lower it straight down over the tube until it rests on the arena's rim.</li>
-        <li>Turn it until the roof's flat back edge lines up with the arena's flat back edge.</li>
+        <li>Hold lid <b>B</b> level above the arena, hole over the tube. Lower it straight down over the tube until its skirt drops inside the inner box and the flange rests on top of it.</li>
+        <li>Turn it until the small bump on the lid's edge lines up with the arena's back-right corner (it only sits flat one way).</li>
       </ol>
       <div class="check">The lid sits flat all round and the tube passes through the hole without touching its edge. If it touches, the socket is off-centre (step 14) or the hole isn't centred (step 5).</div>
     </div>
@@ -532,7 +531,7 @@ pio run -e cyd_demo -t upload</pre>
 <text x="300" y="124" class="sm">rim</text>
 </svg><figcaption>Keep the lid level as it goes on so the hole doesn't bind on the tube.</figcaption></figure>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>9</span></div>
+  <div class="folio"><span>Light the Beam</span><span>10</span></div>
 </section>
 
 <!-- ============================ SCREEN MOUNT (page 10) ============================ -->
@@ -590,7 +589,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="note"><b>Loose?</b> A folded strip of masking tape on the back of the board (never the screen) takes up slack. The bottom lid's tongue and bump (step 19) also press the board up.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>10</span></div>
+  <div class="folio"><span>Light the Beam</span><span>11</span></div>
 </section>
 
 <!-- ============================ PART 4: WIRING (page 11) ============================ -->
@@ -608,8 +607,8 @@ pio run -e cyd_demo -t upload</pre>
         <tr><td><span class="wire" style="background:#2f9e44"></span><b>IO22</b> (CN1)</td><td><span class="wire" style="background:#2f9e44"></span>Green</td><td>Data</td><td>J3</td></tr>
       </table>
       <ol class="do" style="margin-top:6pt">
-        <li>Set the arena on the table behind the plinth, with its wire hole facing the plinth's back.</li>
-        <li>Feed the strip's three wires down through the <b>slot in the plinth's top plate</b> at the back, into the plinth.</li>
+        <li>Set the arena on the table behind the plinth, flat wall toward the plinth's back.</li>
+        <li>Feed the strip's three wires down through the <b>slot in the plinth's top plate</b>. It's at the back, right of centre, just outside the arena recess, directly under where the wires leave the arena wall.</li>
         <li>Through the open bottom of the plinth, make the three lever-nut joints per the table. Fold the thin board wires double as before. Close each lever firmly; you'll feel it click.</li>
         <li>Tug-test all six wire ends.</li>
       </ol>
@@ -640,7 +639,7 @@ pio run -e cyd_demo -t upload</pre>
         <li>Tuck the three connectors into the plinth, toward the back, away from the board.</li>
         <li>Route the board's USB cable out the <b>slot at the back</b> of the plinth (or, if you fitted the optional panel jack, plug its short cable into the board and leave the jack's socket facing out).</li>
         <li>Fit bottom lid <b>D</b>: its tongue goes <b>forward under the console</b>, finger hole toward the back. Press it in evenly until it's flush. The bump on the tongue lands under the board's bottom edge and pushes it up against the window lip.</li>
-        <li>Set the arena down onto the plinth. It drops into the shallow recess in the top plate; turn it so the flat back edge is at the back and the strip wires aren't pinched.</li>
+        <li>Set the arena down onto the plinth. The recess is cut to its exact D-shaped footprint, so it only fits one way: flat wall at the back. Make sure the strip wires drop into the slot and aren't pinched under the edge.</li>
       </ol>
       <div class="check">Plinth lid flush, arena seated with no rocking, one cable out the back. Looking in the front window, the screen is centred and straight.</div>
     </div>
@@ -652,7 +651,7 @@ pio run -e cyd_demo -t upload</pre>
 <text x="120" y="164" class="sm">plinth C · flat back edge of the arena toward the plinth's cable slot</text>
 </svg></figure>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>11</span></div>
+  <div class="folio"><span>Light the Beam</span><span>12</span></div>
 </section>
 
 <!-- ============================ PART 5: SETUP (page 11) ============================ -->
@@ -702,7 +701,7 @@ pio run -e cyd_demo -t upload</pre>
       <div class="check">Beam rises evenly with no dark LEDs. You're done. It will light itself the next time the Kings win.</div>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>12</span></div>
+  <div class="folio"><span>Light the Beam</span><span>13</span></div>
 </section>
 
 <!-- ============================ USING IT (page 12) ============================ -->
@@ -738,7 +737,7 @@ pio run -e cyd_demo -t upload</pre>
       <p class="muted" style="font-size:9.6pt">Dust with a dry cloth. Keep out of direct sun and off radiators: PLA softens around 55 °C and the tube is thin. The lid lifts off to reach the beam; the bottom lid pulls off (finger hole) to reach the board. Unplug before opening.</p>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>13</span></div>
+  <div class="folio"><span>Light the Beam</span><span>14</span></div>
 </section>
 
 <!-- ============================ TROUBLESHOOTING + SPECS (page 13) ============================ -->
@@ -780,7 +779,7 @@ pio run -e cyd_demo -t upload</pre>
       <p class="muted" style="font-size:9.6pt">Everything referenced here lives in the project repo: <code>firmware/</code> (build and flash), <code>models/</code> (OpenSCAD and STL exports), <code>docs/bom.md</code> (parts with links), <code>tools/</code> (helper scripts).</p>
     </div>
   </div>
-  <div class="folio"><span>Light the Beam</span><span>14</span></div>
+  <div class="folio"><span>Light the Beam</span><span>15</span></div>
 </section>
 </body>
 </html>

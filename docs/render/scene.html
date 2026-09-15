@@ -72,7 +72,7 @@ function mesh(geo, mat, opts = {}) {
 // ---- parts -------------------------------------------------------------------
 function makePlinth({ cutaway = false } = {}) {
   const g = new THREE.Group();
-  const r = 115, h = 50;
+  const r = 115, h = 56;
   const wall = cutaway
     ? new THREE.CylinderGeometry(r, r, h, 128, 1, true, THREE.MathUtils.degToRad(100), THREE.MathUtils.degToRad(250))
     : new THREE.CylinderGeometry(r, r, h, 128, 1, false);
@@ -88,14 +88,14 @@ function makePlinth({ cutaway = false } = {}) {
   const ring = mesh(new THREE.TorusGeometry(110.5, 1.2, 8, 128), M.silverDark, { cast: false });
   ring.rotation.x = Math.PI / 2; ring.position.y = h + 0.2; g.add(ring);
   // sloped console on the front: face leans back 20 deg, bottom edge ~18 mm in front of the drum
-  const tilt = THREE.MathUtils.degToRad(20), out = 50 * Math.tan(tilt);
+  const tilt = THREE.MathUtils.degToRad(20), out = h * Math.tan(tilt);
   const sh = new THREE.Shape();   // (u = outward from drum face, v = up), stored as (-u, v) for rotateY(90)
-  sh.moveTo(20, 0); sh.lineTo(-out, 0); sh.lineTo(0, 50); sh.lineTo(20, 50); sh.closePath();
+  sh.moveTo(20, 0); sh.lineTo(-out, 0); sh.lineTo(0, h); sh.lineTo(20, h); sh.closePath();
   const wg = new THREE.ExtrudeGeometry(sh, { depth: 96, bevelEnabled: false });
   wg.rotateY(Math.PI / 2); wg.translate(-48, 0, r);
   const wedge = mesh(wg, ds(M.silver)); g.add(wedge);
   const win = new THREE.Group();
-  win.position.set(0, 25, r + out / 2); win.rotation.x = -tilt;
+  win.position.set(0, h / 2, r + out / 2); win.rotation.x = -tilt;
   const bezel = mesh(new THREE.BoxGeometry(62, 46, 4), M.black); bezel.position.z = 1; win.add(bezel);
   const screen = new THREE.Mesh(new THREE.PlaneGeometry(57, 43), screenMaterial()); screen.position.z = 3.05; win.add(screen);
   g.add(win);
@@ -310,6 +310,41 @@ function screenMaterial() {
   return new THREE.MeshBasicMaterial({ map: t, toneMapped: false });
 }
 
+
+// ---- real Printables meshes -------------------------------------------------------
+// Binary STL -> BufferGeometry. Files are fetched relative to this page; headless Chrome
+// needs --allow-file-access-from-files for file:// (tools/render_views.sh passes it).
+async function loadStl(url) {
+  const buf = await (await fetch(url)).arrayBuffer();
+  const dv = new DataView(buf); const n = dv.getUint32(80, true);
+  const pos = new Float32Array(n * 9);
+  for (let i = 0; i < n; i++) { const o = 84 + i * 50; for (let k = 0; k < 9; k++) pos[i * 9 + k] = dv.getFloat32(o + 12 + k * 4, true); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.computeVertexNormals(); return g;
+}
+// STL frame -> scene frame: STL z is up; the flat edge (STL +x) goes to the back (-z).
+// Footprint centre in STL coords from tools/measure_arena.py.
+const ARENA_CX = 153.4, ARENA_CY = 151.0;
+function placeArena(geo, y) {
+  geo.translate(-ARENA_CX, -ARENA_CY, 0);
+  geo.rotateX(-Math.PI / 2);          // z up -> y up  (x, y, z) -> (x, z, -y)
+  geo.rotateY(Math.PI);               // flat edge (+x) -> back (-z)
+  const m = mesh(geo, M.silver); m.position.y = y; return m;
+}
+const REAL = {};
+async function loadReal() {
+  try {
+    const [b, l] = await Promise.all([loadStl('../../models/printables/base_220.stl'), loadStl('../../models/printables/lid_220_nohole.stl')]);
+    REAL.base = b; REAL.lid = l;
+    // the lid file has its own origin; centre it on its bbox and drop it onto the inner box (49.5 mm)
+    l.computeBoundingBox(); const c = l.boundingBox.getCenter(new THREE.Vector3());
+    l.translate(-c.x, -c.y, -l.boundingBox.min.z);
+    l.translate(1.5, -3.9, 0);          // well centre offset
+    l.rotateX(-Math.PI / 2); l.rotateY(Math.PI);
+  } catch (e) { console.log('real meshes unavailable, using the stand-in: ' + e); }
+}
+function realBase(y) { return placeArena(REAL.base, y); }
+function realLid(y) { const m = mesh(REAL.lid, M.silver); m.position.y = y; return m; }
+
 // ---- lights ------------------------------------------------------------------
 scene.add(new THREE.HemisphereLight(col(0x7a66b0), col(0x0a0710), 0.55));
 const key = new THREE.DirectionalLight(col(0xfff2e2), 1.05);
@@ -326,17 +361,22 @@ const ground = mesh(new THREE.PlaneGeometry(4000, 4000), M.ground, { cast: false
 ground.rotation.x = -Math.PI / 2; scene.add(ground);
 
 // ---- assemble the requested view -----------------------------------------------
+async function buildScene() {
 const camera = new THREE.PerspectiveCamera(30, W / H, 5, 5000);
 function look(px, py, pz, tx, ty, tz, fov = 30) { camera.fov = fov; camera.position.set(px, py, pz); camera.lookAt(tx, ty, tz); camera.updateProjectionMatrix(); }
 
-const ARENA_Y = 50, ROOF_Y = ARENA_Y + 60, TUBE_Y = ARENA_Y + 3 + 8;   // tube foot sits in the socket on the arena floor
+await loadReal();
+const real = !!REAL.base;
+const ARENA_Y = 56, ROOF_Y = ARENA_Y + (real ? 44.5 : 60), TUBE_Y = ARENA_Y + 2 + 8;   // tube foot sits in the socket on the arena floor
+const arenaBase = () => real ? realBase(0) : makeArenaBase();
+const arenaRoof = () => real ? realLid(0) : makeRoof();
 
 if (VIEW === 'hero' || VIEW === 'screen') {
   const plinth = makePlinth(); scene.add(plinth);
-  const base = makeArenaBase(); base.position.y = ARENA_Y; scene.add(base);
-  const roof = makeRoof(); roof.position.y = ROOF_Y; scene.add(roof);
+  const base = arenaBase(); base.position.y = ARENA_Y; scene.add(base);
+  const roof = arenaRoof(); roof.position.y = ROOF_Y; scene.add(roof);
   const tube = makeTube(); tube.position.y = TUBE_Y; scene.add(tube);
-  if (VIEW === 'hero') look(320, 300, 540, 0, 115, 0, 33);
+  if (VIEW === 'hero') look(270, 250, 460, 0, 125, 0, 33);
   else look(120, 110, 320, 0, 35, 80, 24);
 }
 
@@ -344,9 +384,9 @@ if (VIEW === 'exploded') {
   ground.position.y = -90;
   const plinth = makePlinth(); scene.add(plinth);
   const lid = mesh(new THREE.CylinderGeometry(108, 108, 2.4, 96), M.silver); lid.position.y = -50; scene.add(lid);
-  const base = makeArenaBase(); base.position.y = ARENA_Y + 60; scene.add(base);
+  const base = arenaBase(); base.position.y = ARENA_Y + 60; scene.add(base);
   const socket = makeSocket(); socket.position.y = ARENA_Y + 60 + 3; scene.add(socket);
-  const roof = makeRoof(); roof.position.y = ROOF_Y + 150; scene.add(roof);
+  const roof = arenaRoof(); roof.position.y = ROOF_Y + 150; scene.add(roof);
   const spine = makeSpine(); spine.position.y = ROOF_Y + 150 + 80 + 8; spine.position.x = 0; scene.add(spine);
   const tube = makeTube({ ghost: true }); tube.position.y = ROOF_Y + 150 + 80; scene.add(tube);
   // dashed axis
@@ -376,7 +416,7 @@ if (VIEW === 'strip') {
 
 if (VIEW === 'cutaway') {
   const plinth = makePlinth({ cutaway: true }); scene.add(plinth);
-  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.position.set(0, 25, 118); scene.add(board);
+  const board = makeBoard(); board.rotation.x = THREE.MathUtils.degToRad(70); board.position.set(0, 28, 118); scene.add(board);
   for (let i = 0; i < 3; i++) { const w = makeWago(); w.position.set(-40 + i * 22, 4.5, -60); scene.add(w); }
   scene.add(wire([[-30, 8, -62], [-20, 20, -20], [-10, 30, 40], [-5, 34, 88]], M.wireRed));
   scene.add(wire([[-8, 8, -62], [0, 22, -20], [5, 32, 40], [8, 36, 88]], M.wireWhite));
@@ -400,8 +440,8 @@ if (VIEW === 'wiring') {
 }
 
 if (VIEW === 'lid') {
-  const base = makeArenaBase(); scene.add(base);
-  const roof = makeRoof(); roof.position.y = 60 + 40; scene.add(roof);
+  const base = arenaBase(); scene.add(base);
+  const roof = arenaRoof(); roof.position.y = 60 + 40; scene.add(roof);
   const socket = makeSocket(); socket.position.y = 3; scene.add(socket);
   const tube = makeTube({ ghost: false, glow: false }); tube.position.y = 11; scene.add(tube);
   look(230, 260, 300, 0, 90, 0, 32);
@@ -409,18 +449,21 @@ if (VIEW === 'lid') {
 
 if (VIEW === 'plinth_top') {
   const plinth = makePlinth(); scene.add(plinth);
-  const base = makeArenaBase(); base.position.y = ARENA_Y + 70; scene.add(base);
+  const base = arenaBase(); base.position.y = ARENA_Y + 70; scene.add(base);
   look(300, 300, 420, 0, 70, 0, 30);
 }
 
-// ---- render once fonts are in ---------------------------------------------------
-document.fonts.load('700 40px "Barlow Condensed"').then(() => document.fonts.load('600 20px Barlow')).then(() => {
+return camera;
+}
+
+// ---- render once fonts and meshes are in ---------------------------------------
+buildScene().then(camera => document.fonts.load('700 40px "Barlow Condensed"').then(() => document.fonts.load('600 20px Barlow')).then(() => {
   // rebuild screen textures now that fonts exist
   scene.traverse(o => { if (o.material && o.material.map && o.material.map.image && o.material.map.image.width === 640) { o.material = screenMaterial(); } });
   scene.traverse(o => { if (o.name === 'billboard') { const p = new THREE.Vector3(); o.getWorldPosition(p); o.rotation.y = Math.atan2(camera.position.x - p.x, camera.position.z - p.z); } });
   renderer.render(scene, camera);
   document.title = 'done:' + VIEW;
-});
+}));
 </script>
 </body>
 </html>

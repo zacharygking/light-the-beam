@@ -48,8 +48,10 @@ app-controlled light bar, and the arena sits on a new printed plinth that holds 
    On first boot join the `KingsBeam-Setup` WiFi network from your phone and pick your home
    WiFi. The board remembers it.
 3. **Print**: download the 220 mm arena base and no-hole lid from Printables into
-   `models/printables/` (see the README there), measure the base, then `cd models && make`
-   to export the plinth, beam tube, spine and socket. Print the `plinth_test.stl` slice first.
+   `models/printables/` as `base_220.stl` and `lid_220_nohole.stl`, run
+   `python3 tools/measure_arena.py` (writes the footprint outline the plinth recess is cut
+   to), then `cd models && make` to export the plinth, beam tube, spine and socket. Print
+   `plinth_test.stl` (the console alone) first to check the board fit.
 4. **Wire** the strip to the board with three WAGO 221-413 lever nuts (diagram in
    `docs/bom.md`). Board VIN → strip 5V, GND → GND, GPIO 22 → DIN.
 
@@ -65,6 +67,7 @@ python3 ../tools/espn_probe.py     # what the board will see right now
 python3 ../tools/make_fixtures.py  # refresh live/post fixtures from last season's games
 python3 ../tools/make_fonts.py     # regenerate LVGL fonts from tools/fonts/*.ttf (needs Pillow)
 python3 ../tools/make_logos.py     # regenerate team logos + colors from ESPN
+python3 ../tools/measure_arena.py  # measure the downloaded arena STL, write models/arena_outline.scad
 ../tools/render_views.sh           # re-render docs/render/*.png from the three.js scene (headless Chrome)
 ```
 
@@ -92,7 +95,8 @@ a browser UA.
 - Firmware builds (`cyd` and `cyd_demo`), parser tested against real fixtures. Not yet run on
   hardware: display rotation, touch threshold and the first-LED data level are the things most
   likely to need a tweak.
-- Models are parametric OpenSCAD; `arena_d` and the wire-hole angle must be measured from the
-  downloaded arena STL before printing the plinth body.
+- Models are parametric OpenSCAD, exported and previewed with OpenSCAD 2021.01. The plinth recess is
+  cut to the measured arena footprint (`tools/measure_arena.py`); the wire slot sits under the
+  arena's built-in channel exit at the back right.
 - Preseason opener is Oct 5, 2026 (LAL @ SAC); the live and final screens get their first
   real data then. `tools/make_fixtures.py` already exercised them with last season's games.
