@@ -53,6 +53,46 @@ Calibration of this model (predicted home win probability vs. how often the home
 | 0.8–0.9 | 52,327 | 0.850 | 0.855 |
 | 0.9–1.0 | 91,946 | 0.969 | 0.981 |
 
+## Accuracy, and why it is not the headline
+
+Accuracy here means: at every play, call the winner as whichever side is above 50%. It is easy to read but it scores a 51% and a 99% the same, so it cannot tell an honest 65% from an overconfident one. The pill's actual claim is "in situations like this one, the Kings win about this often", and the calibration table above is the test of that claim. Accuracy is reported for completeness:
+
+| phase | plays | this model | ESPN | always pick home |
+|---|---|---|---|---|
+| tip-off | 1,339 | 0.557 | 0.688 | 0.558 |
+| 1st quarter | 154,850 | 0.620 | 0.694 | 0.557 |
+| 2nd | 163,030 | 0.702 | 0.733 | 0.555 |
+| 3rd | 158,913 | 0.784 | 0.797 | 0.555 |
+| 4th + OT | 163,067 | 0.880 | 0.883 | 0.555 |
+| last minute | 22,934 | 0.939 | 0.939 | 0.551 |
+| all plays | 641,199 | 0.747 | 0.778 | 0.556 |
+| within 3 points, under 5 minutes | 17,575 | 0.716 | 0.715 | |
+| SAC games only | 38,877 | 0.766 | 0.815 | |
+
+At tip-off the model is exactly the always-home coin flip, because it knows nothing about the teams; ESPN's edge there is pregame odds. By the fourth quarter, and in close late-game situations, the two are indistinguishable. The SAC gap is wider than average for the same reason: a team's record is a strong pregame prior that ESPN has and this model does not.
+
+## SAC games: what the pill would have shown
+
+The pill shows P(SAC wins), so this restricts the held-out season to 82 SAC games (38,877 plays), flips the home probability when SAC is away, and calibrates that number (Brier 0.1524, log loss 0.4526). In toss-up situations (predicted 30–70%) the pill would have overstated SAC's chances by 19 points on average. That is systematic, not noise: SAC went 22-60, and the model starts every game at the league-average home prior. Late in games (the 0.8+ bins) the scoreboard takes over and the pill is honest again. This is the case for the team-strength prior below.
+
+| bin | plays | mean predicted | SAC actually won |
+|---|---|---|---|
+| 0.0–0.1 | 8,174 | 0.029 | 0.020 |
+| 0.1–0.2 | 3,762 | 0.150 | 0.090 |
+| 0.2–0.3 | 4,104 | 0.250 | 0.173 |
+| 0.3–0.4 | 4,675 | 0.352 | 0.181 |
+| 0.4–0.5 | 5,350 | 0.450 | 0.253 |
+| 0.5–0.6 | 4,663 | 0.547 | 0.341 |
+| 0.6–0.7 | 3,072 | 0.644 | 0.449 |
+| 0.7–0.8 | 1,747 | 0.749 | 0.653 |
+| 0.8–0.9 | 1,649 | 0.848 | 0.834 |
+| 0.9–1.0 | 1,681 | 0.960 | 0.992 |
+
+## Not yet measured
+
+- **Jitter between polls.** The board refreshes every 20 seconds, not every play. A replay at 20-second sampling would show how much the pill moves between refreshes, which is a display question rather than a model question, and decides whether the number needs smoothing or rounding to 5%.
+- **A team-strength prior.** The SAC-only calibration above and the first two rows of the accuracy table are the same gap seen twice: the model starts every game at the league-average home prior. Win-loss records would recover most of it, at the cost of one extra request per game for the opponent's record (the pregame response carries neither team's). This is the first thing to add once the pill is on screen.
+
 ## C++ bench
 
 `firmware/test/test_winprob` runs on the host with `pio test -e native -f test_winprob` (also in CI). It checks:

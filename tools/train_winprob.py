@@ -55,6 +55,12 @@ def load(season):
     return rows
 
 
+def load_games(season):
+    """game id -> {home, away, ...} from the game list."""
+    return {json.loads(l)["game"]: json.loads(l)
+            for l in (ROOT / "data" / "games" / f"{season}.jsonl").read_text().splitlines()}
+
+
 def features(margin, frac, eps):
     s = math.sqrt(frac + eps)
     return (1.0, margin / s, s, float(margin))
@@ -158,6 +164,7 @@ def main():
     ap.add_argument("--train", type=int, default=2025)
     ap.add_argument("--test", type=int, default=2026)
     ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--team", default="SAC", help="ESPN abbreviation of the team the pill shows")
     args = ap.parse_args()
     rng = random.Random(args.seed)
 
@@ -242,6 +249,46 @@ def main():
         e = metrics([(wp, y) for _, _, y, wp in sel])
         quarters.append((name, o["n"], o["brier"], e["brier"]))
     prior = metrics([(predict(coef, 0, 1.0, eps), y) for _, _, y, _, _ in test])
+    tn = args.team
+
+    # accuracy by phase, close games, and our team's games (what the pill actually shows)
+    def acc(sel, use_espn=False):
+        pairs = [((wp if use_espn else predict(coef, mg, fr, eps)), y) for mg, fr, y, wp, _ in sel if not use_espn or wp is not None]
+        return metrics(pairs)["accuracy"], len(pairs)
+    phases = []
+    for lo, hi, name in [(0.999, 1.01, "tip-off"), (0.75, 0.999, "1st quarter"), (0.5, 0.75, "2nd"), (0.25, 0.5, "3rd"),
+                         (0.0, 0.25, "4th + OT"), (0.0, 60 / REG_SECS, "last minute"), (-1, 2, "all plays")]:
+        sel = [r for r in test if lo <= r[1] < hi]
+        a, n = acc(sel); e, _ = acc(sel, True)
+        home = sum(r[2] for r in sel) / len(sel)
+        phases.append((name, n, a, e, home))
+    close = [r for r in test if r[1] < 300 / REG_SECS and abs(r[0]) <= 3]
+    close_row = (*acc(close), acc(close, True)[0])
+    games_meta = load_games(args.test)
+    ours_games = {g for g, m in games_meta.items() if args.team in (m["home"], m["away"])}
+    ours_rows = [r for r in test if r[4] in ours_games]
+    ours_row = (*acc(ours_rows), acc(ours_rows, True)[0])
+    # the pill shows P(our team wins): flip home probability when we are away, then calibrate
+    us_pairs = []
+    for mg, fr, y, _, g in ours_rows:
+        home = games_meta[g]["home"] == args.team
+        p = predict(coef, mg, fr, eps)
+        us_pairs.append((p if home else 1 - p, y if home else 1 - y))
+    us_cal = calibration(us_pairs)
+    us_m = metrics(us_pairs)
+    mid = [(mp - ob) for lo, hi, n, mp, ob in us_cal if 0.3 <= lo < 0.7]
+    mid_gap = sum(mid) / len(mid) if mid else 0.0
+    record = sum(1 for g in ours_games if (games_meta[g]["home"] == tn) == games_meta[g]["home_won"])
+    if abs(mid_gap) < 0.05:
+        verdict = (f"In toss-up situations (predicted 30–70%) the pill is within {abs(mid_gap) * 100:.0f} points of what "
+                   f"happened, so last season's {tn} pill would have been about as honest as the league-wide one.")
+    else:
+        word = "overstated" if mid_gap > 0 else "understated"
+        verdict = (f"In toss-up situations (predicted 30–70%) the pill would have {word} {tn}'s chances by "
+                   f"{abs(mid_gap) * 100:.0f} points on average. That is systematic, not noise: {tn} went "
+                   f"{record}-{len(ours_games) - record}, and the model starts every game at the league-average "
+                   f"home prior. Late in games (the 0.8+ bins) the scoreboard takes over and the pill is honest again. "
+                   f"This is the case for the team-strength prior below.")
     doc = [f"# Live win probability: model and bench",
            "",
            f"Fitted by `tools/train_winprob.py` on every play of the {args.train - 1}-{args.train % 100:02d} season "
@@ -298,6 +345,44 @@ def main():
            "|---|---|---|---|"]
     doc += [f"| {lo:.1f}–{hi:.1f} | {n:,} | {mp:.3f} | {ob:.3f} |" for lo, hi, n, mp, ob in cal]
     doc += ["",
+            "## Accuracy, and why it is not the headline",
+            "",
+            "Accuracy here means: at every play, call the winner as whichever side is above 50%. "
+            "It is easy to read but it scores a 51% and a 99% the same, so it cannot tell an honest 65% from an "
+            "overconfident one. The pill's actual claim is \"in situations like this one, the Kings win about this "
+            "often\", and the calibration table above is the test of that claim. Accuracy is reported for completeness:",
+            "",
+            "| phase | plays | this model | ESPN | always pick home |",
+            "|---|---|---|---|---|"]
+    doc += [f"| {name} | {n:,} | {a:.3f} | {e:.3f} | {home:.3f} |" for name, n, a, e, home in phases]
+    doc += [f"| within 3 points, under 5 minutes | {close_row[1]:,} | {close_row[0]:.3f} | {close_row[2]:.3f} | |",
+            f"| {tn} games only | {ours_row[1]:,} | {ours_row[0]:.3f} | {ours_row[2]:.3f} | |",
+            "",
+            "At tip-off the model is exactly the always-home coin flip, because it knows nothing about the teams; "
+            "ESPN's edge there is pregame odds. By the fourth quarter, and in close late-game situations, the two are "
+            f"indistinguishable. The {tn} gap is wider than average for the same reason: a team's record is a strong "
+            "pregame prior that ESPN has and this model does not.",
+            "",
+            f"## {tn} games: what the pill would have shown",
+            "",
+            f"The pill shows P({tn} wins), so this restricts the held-out season to {len(ours_games)} {tn} games "
+            f"({us_m['n']:,} plays), flips the home probability when {tn} is away, and calibrates that number "
+            f"(Brier {us_m['brier']:.4f}, log loss {us_m['logloss']:.4f}). {verdict}",
+            "",
+            f"| bin | plays | mean predicted | {tn} actually won |",
+            "|---|---|---|---|"]
+    doc += [f"| {lo:.1f}–{hi:.1f} | {n:,} | {mp:.3f} | {ob:.3f} |" for lo, hi, n, mp, ob in us_cal]
+    doc += ["",
+            "## Not yet measured",
+            "",
+            "- **Jitter between polls.** The board refreshes every 20 seconds, not every play. A replay at 20-second "
+            "sampling would show how much the pill moves between refreshes, which is a display question rather than a "
+            "model question, and decides whether the number needs smoothing or rounding to 5%.",
+            f"- **A team-strength prior.** The {tn}-only calibration above and the first two rows of the accuracy table "
+            "are the same gap seen twice: the model starts every game at the league-average home prior. Win-loss "
+            "records would recover most of it, at the cost of one extra request per game for the opponent's record "
+            "(the pregame response carries neither team's). This is the first thing to add once the pill is on screen.",
+            "",
             "## C++ bench",
             "",
             "`firmware/test/test_winprob` runs on the host with `pio test -e native -f test_winprob` (also in CI). It checks:",

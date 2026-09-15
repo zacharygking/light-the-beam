@@ -95,7 +95,7 @@ A four-coefficient logistic model of the home team's chance to win from the scor
 | ESPN | 0.147 | 0.442 |
 | home-court prior only | 0.247 | 0.687 |
 
-The gap to ESPN is pregame information (team strength, possession): three Brier points in the first quarter, one thousandth by the fourth. Details, calibration table and next steps are in [docs/winprob.md](docs/winprob.md).
+The gap to ESPN is pregame information (team strength, possession): three Brier points in the first quarter, one thousandth by the fourth. Accuracy is 0.747 against ESPN's 0.778, but calibration is the number that matters for a probability pill, and league-wide it holds within three points in every bin. Restricted to Kings games it does not: the pill would have overstated a 22-win team's chances in toss-up situations, which is the case for adding a team-strength prior. Details, tables and open evaluation questions are in [docs/winprob.md](docs/winprob.md).
 
 **The board trains itself.** The training plays are binned to 35,221 (margin, 5-second) cells with win/loss counts, a 247 KB table embedded in the firmware image. On boot the ESP32 refits the model from that table with `firmware/src/winprob_train.h`, a header-only Newton-Raphson trainer, and shows "TRAINED ON 623,853 PLAYS IN … MS" on the splash screen. It takes 23 ms on a laptop; the board's single-precision FPU should land well under a second.
 
